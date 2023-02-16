@@ -1,0 +1,10 @@
+.git
+.vscode
+README.md
+docker
+dist
+
+# Node Files #
+node_modules
+npm-debug.log
+npm-debug.log.*

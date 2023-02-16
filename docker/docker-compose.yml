@@ -1,0 +1,31 @@
+version: "3.8"
+services:
+  app:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - 3000:3000
+      - 9229:9229 # debugging port
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: password
+      DB_NAME: weather
+    volumes:
+      - ../:/usr/src/app
+      - /usr/src/app/node_modules # dont overwrite node_modules inside container (some packages need to be built for specific platform, so they might be broken if they are mounted, more info on this syntax - https://stackoverflow.com/questions/29181032/add-a-volume-to-docker-but-exclude-a-sub-folder/37898591#37898591)
+    command: ["npm", "run", "start:debug"]
+
+  db:
+    image: postgres:13-alpine
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: weather
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
