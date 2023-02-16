@@ -2,6 +2,7 @@
 
 - ~~Generate boilerplate NestJS app~~
 - ~~Dockerize~~
+- Add swagger
 - Add ORM
 - Add endpoints
 - Grab weather data for next 5 days on startup
