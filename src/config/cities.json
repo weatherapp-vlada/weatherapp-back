@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Belgrade",
+    "countryCode": "RS",
+    "lat": 44.787197,
+    "long": 20.457273
+  },
+  {
+    "name": "Paris",
+    "countryCode": "FR",
+    "lat": 48.864716,
+    "long": 2.349014
+  },
+  {
+    "name": "New York",
+    "countryCode": "US",
+    "lat": 40.73061,
+    "long": -73.935242
+  }
+]
