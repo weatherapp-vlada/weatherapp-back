@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 services:
   app:
     build:
@@ -14,10 +14,11 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: password
       DB_NAME: weather
+      OPENWEATHER_APIKEY: ${OPENWEATHER_APIKEY}
     volumes:
       - ../:/usr/src/app
       - /usr/src/app/node_modules # dont overwrite node_modules inside container (some packages need to be built for specific platform, so they might be broken if they are mounted, more info on this syntax - https://stackoverflow.com/questions/29181032/add-a-volume-to-docker-but-exclude-a-sub-folder/37898591#37898591)
-    command: ["npm", "run", "start:debug"]
+    command: ['npm', 'run', 'start:debug']
 
   db:
     image: postgres:13-alpine

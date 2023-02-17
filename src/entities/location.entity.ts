@@ -5,7 +5,7 @@ import {
   Unique,
   OneToMany,
 } from 'typeorm';
-import { Temperature } from './Temperature.entity';
+import { Temperature } from './temperature.entity';
 
 @Entity()
 @Unique('idx_uniq_city', ['name', 'countryCode'])
@@ -16,13 +16,13 @@ export class Location {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ name: 'country_code', length: 2 })
   countryCode: string;
 
-  @Column()
+  @Column({ type: 'decimal', precision: 19, scale: 16 })
   latitude: number;
 
-  @Column()
+  @Column({ type: 'decimal', precision: 19, scale: 16 })
   longitude: number;
 
   @OneToMany(() => Temperature, (temperature) => temperature.location)

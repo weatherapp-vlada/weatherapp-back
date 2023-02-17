@@ -5,16 +5,26 @@
 - ~~Add swagger~~
 - ~~Add ORM, setup DB and migrations~~
 - ~~Add config for supported cities~~
+- ~~Implement OpenWeatherMapApi client~~
 - Add endpoints for fetching weather data
 - Grab weather data for next 5 days on startup
 - Create cronjob to update weather data hourly/daily
+- Add database index to appropriate columns
 - IaC for CI/CD and deployment to AWS Elastic Beanstalk
 
 # How to start app locally
 
-1. Install Docker
-2. In shell of your choice go into `docker` folder
-3. Run `docker-compose up` command
-4. Stop app with `docker-compose down`
+1. Install Docker and docker-compose
+2. Create `./docker/.env` file according to `./docker/.env.example` (use your own OpenWeatherMap API key)
+3. In shell of your choice go into `docker` folder
+4. Run `docker-compose up` command
+5. Stop app with `docker-compose down`
 
 App is running at `localhost:3000`. Swagger is at `localhost:3000/swagger`.
+
+# Generating migrations
+
+```
+docker-compose up
+npm run migration:host:generate -- --name=migration_name
+```
