@@ -3,16 +3,30 @@ import { Injectable, Logger } from '@nestjs/common';
 import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
 
+interface Forecast {
+  timestamp: number;
+  temperatureCelsius: number;
+}
+
+interface OpenWeatherApiForecastResponse {
+  list: {
+    dt: number;
+    main: {
+      temp: number;
+    };
+  }[];
+}
+
 @Injectable()
 export class OpenWeatherApiService {
   private readonly logger = new Logger(OpenWeatherApiService.name);
 
   constructor(private readonly httpService: HttpService) {}
 
-  async fetchForecast({ lat, lon }: any): Promise<any[]> {
+  async fetchForecast({ lat, lon }: any): Promise<Forecast[]> {
     const { data } = await firstValueFrom(
       this.httpService
-        .get<any[]>('/forecast', {
+        .get<OpenWeatherApiForecastResponse>('/forecast', {
           params: {
             lat,
             lon,
@@ -27,8 +41,13 @@ export class OpenWeatherApiService {
         ),
     );
 
-    this.logger.log(`data: ${JSON.stringify(data)}`);
+    const { list } = data;
 
-    return data;
+    return list.map(
+      ({ dt: timestamp, main: { temp: temperatureCelsius } }) => ({
+        timestamp,
+        temperatureCelsius,
+      }),
+    );
   }
 }

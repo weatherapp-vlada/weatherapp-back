@@ -6,7 +6,9 @@ import { OpenWeatherApiModule } from './open-weather-api/open-weather-api.module
 import dbConfig from './config/db.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { Location } from './entities/location.entity';
+import { LocationEntity } from './entities/location.entity';
+import { TemperatureEntity } from './entities/temperature.entity';
+import { ForecastUpdaterModule } from './forecast-updater/forecast-updater.module';
 
 @Module({
   imports: [
@@ -20,7 +22,9 @@ import { Location } from './entities/location.entity';
         configService.get('database'),
     }),
     OpenWeatherApiModule,
-    TypeOrmModule.forFeature([Location]),
+    TypeOrmModule.forFeature([LocationEntity]),
+    TypeOrmModule.forFeature([TemperatureEntity]),
+    ForecastUpdaterModule,
   ],
   controllers: [AppController],
   providers: [AppService],

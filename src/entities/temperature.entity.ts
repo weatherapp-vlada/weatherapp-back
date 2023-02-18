@@ -1,11 +1,25 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, Unique } from 'typeorm';
-import { Location } from './location.entity';
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  ManyToOne,
+  Unique,
+  JoinColumn,
+} from 'typeorm';
+import { LocationEntity } from './location.entity';
 
-@Entity()
+@Entity({ name: 'temperature' })
 @Unique(['timestamp', 'location'])
-export class Temperature {
+export class TemperatureEntity {
   @PrimaryColumn()
   timestamp: Date;
+
+  @PrimaryColumn({ name: 'location_id' })
+  locationId: number;
+
+  @ManyToOne(() => LocationEntity)
+  @JoinColumn({ name: 'location_id', referencedColumnName: 'id' })
+  location: LocationEntity;
 
   @Column({
     type: 'decimal',
@@ -14,7 +28,4 @@ export class Temperature {
     name: 'temperature_celsius',
   })
   temperatureCelsius: number;
-
-  @ManyToOne(() => Location, (location) => location.temperatures)
-  location: Location;
 }

@@ -1,15 +1,8 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  Unique,
-  OneToMany,
-} from 'typeorm';
-import { Temperature } from './temperature.entity';
+import { Entity, Column, Unique, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity({ name: 'location' })
 @Unique('idx_uniq_city', ['name', 'countryCode'])
-export class Location {
+export class LocationEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -24,7 +17,4 @@ export class Location {
 
   @Column({ type: 'decimal', precision: 19, scale: 16 })
   longitude: number;
-
-  @OneToMany(() => Temperature, (temperature) => temperature.location)
-  temperatures: Temperature[];
 }
