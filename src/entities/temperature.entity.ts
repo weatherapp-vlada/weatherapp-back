@@ -1,15 +1,7 @@
-import {
-  Entity,
-  Column,
-  PrimaryColumn,
-  ManyToOne,
-  Unique,
-  JoinColumn,
-} from 'typeorm';
+import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { LocationEntity } from './location.entity';
 
 @Entity({ name: 'temperature' })
-@Unique(['timestamp', 'location'])
 export class TemperatureEntity {
   @PrimaryColumn()
   timestamp: Date;

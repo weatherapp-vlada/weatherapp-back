@@ -8,8 +8,8 @@
 - ~~Implement OpenWeatherMapApi client~~
 - ~~Add endpoints for fetching weather data~~
 - ~~Create cronjob to update weather data hourly/daily~~
-- Format respones (dates, temperatures), error handling and logging
-- Grab weather data for next 5 days on startup if needed
+- ~~Grab weather data for next 5 days on startup if needed~~
+- Format responses (dates, temperatures), error handling and logging
 - IaC for CI/CD and deployment to AWS Elastic Beanstalk
 
 # How to start app locally

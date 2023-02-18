@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 import { IsArray, IsDateString, IsNumber, IsString } from 'class-validator';
 
 export class SingleDayTemperatureDto {
@@ -29,6 +28,5 @@ export class DailyTemperatureResponseDto {
     isArray: true,
   })
   @IsArray()
-  @Type(() => SingleDayTemperatureDto)
   forecast: SingleDayTemperatureDto[];
 }

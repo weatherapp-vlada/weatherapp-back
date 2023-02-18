@@ -1,11 +1,12 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiExtraModels, ApiResponse } from '@nestjs/swagger';
 import { AppService } from './app.service';
-import { AverageTemperatureResponseDto } from './dto/averageTemperatureResponse.dto';
-import { DailyTemperatureResponseDto } from './dto/dailyTemperatureResponse.dto';
-import { GetAverageTemperatureQuery } from './dto/getAverageTemperatureQuery.dto';
-import { GetDailyTemperatureQuery } from './dto/getDailyTemperatureQuery.dto';
+import { AverageTemperatureResponseDto } from './dto/average-temperature-response.dto';
+import { DailyTemperatureResponseDto } from './dto/daily-temperature-response.dto';
+import { GetAverageTemperatureQuery } from './dto/get-average-temperature-query.dto';
+import { GetDailyTemperatureQuery } from './dto/get-daily-temperature-query.dto';
 import { LocationDto } from './dto/location.dto';
+import { addDays } from './utils/date.utils';
 
 @Controller()
 export class AppController {
@@ -31,11 +32,11 @@ export class AppController {
   })
   getAverageTemperature(
     @Query()
-    { startTimestamp, endTimestamp, cities, sort }: GetAverageTemperatureQuery,
+    { startDate, endDate, cities, sort }: GetAverageTemperatureQuery,
   ): Promise<AverageTemperatureResponseDto[]> {
     return this.appService.getAverageTemperature({
-      startDate: new Date(startTimestamp),
-      endDate: new Date(endTimestamp),
+      startDate: new Date(startDate),
+      endDate: addDays(new Date(endDate), 1),
       cities,
       sort,
     });
@@ -49,16 +50,11 @@ export class AppController {
   })
   getDailyTemperature(
     @Query()
-    {
-      startTimestamp,
-      endTimestamp,
-      locationName,
-      countryCode,
-    }: GetDailyTemperatureQuery,
+    { startDate, endDate, locationName, countryCode }: GetDailyTemperatureQuery,
   ): Promise<DailyTemperatureResponseDto> {
     return this.appService.getDailyTemperature({
-      startDate: new Date(startTimestamp),
-      endDate: new Date(endTimestamp),
+      startDate: new Date(startDate),
+      endDate: addDays(new Date(endDate), 1),
       locationName,
       countryCode,
     });

@@ -4,8 +4,8 @@ import { In, Repository } from 'typeorm';
 import { LocationEntity } from './entities/location.entity';
 import { LocationDto } from './dto/location.dto';
 import { TemperatureEntity } from './entities/temperature.entity';
-import { AverageTemperatureResponseDto } from './dto/averageTemperatureResponse.dto';
-import { DailyTemperatureResponseDto } from './dto/dailyTemperatureResponse.dto';
+import { AverageTemperatureResponseDto } from './dto/average-temperature-response.dto';
+import { DailyTemperatureResponseDto } from './dto/daily-temperature-response.dto';
 
 export interface GetAverageTemperatureParams {
   startDate: Date;
@@ -50,7 +50,10 @@ export class AppService {
   async getLocations(): Promise<LocationDto[]> {
     const locations = await this.locationsRepository.find();
 
-    return locations.map((location) => LocationDto.fromEntity(location));
+    return locations.map(({ name, countryCode }) => ({
+      name,
+      countryCode,
+    }));
   }
 
   async getAverageTemperature({
@@ -59,9 +62,11 @@ export class AppService {
     cities,
     sort,
   }: GetAverageTemperatureParams): Promise<AverageTemperatureResponseDto[]> {
-    const locations = await this.locationsRepository.find({
-      where: { name: In([...cities]) },
-    });
+    const locations = cities?.length
+      ? await this.locationsRepository.find({
+          where: { name: In([...cities]) },
+        })
+      : await this.locationsRepository.find();
 
     if (!locations?.length) {
       throw new Error('No supported cities provided.');
@@ -83,8 +88,8 @@ export class AppService {
       .where('location_id IN (:...ids)', {
         ids: locations.map((location) => location.id),
       })
-      .andWhere('temp.timestamp >= :timestamp', { timestamp: startDate })
-      .andWhere('temp.timestamp <= :timestamp', { timestamp: endDate })
+      .andWhere('temp.timestamp >= :startDate', { startDate })
+      .andWhere('temp.timestamp < :endDate', { endDate })
       .groupBy('location_id, location_name, location_country_code');
 
     const queryWithSort = !sort
@@ -131,7 +136,7 @@ export class AppService {
         locationId: location.id,
       })
       .andWhere('temp.timestamp >= :startDate', { startDate })
-      .andWhere('temp.timestamp <= :endDate', { endDate })
+      .andWhere('temp.timestamp < :endDate', { endDate })
       .groupBy('location_id, day')
       .orderBy('day', 'ASC')
       .getRawMany<GetDailyTemperatureQueryResult>();

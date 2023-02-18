@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as PgBoss from 'pg-boss';
@@ -6,12 +6,13 @@ import { TypeormConfiguration } from 'src/config/db.config';
 import { LocationEntity } from 'src/entities/location.entity';
 import { TemperatureEntity } from 'src/entities/temperature.entity';
 import { OpenWeatherApiService } from 'src/open-weather-api/open-weather-api.service';
-import { Repository } from 'typeorm';
+import { addDays } from 'src/utils/date.utils';
+import { Between, Repository } from 'typeorm';
 
 @Injectable()
-export class ForecastUpdaterService implements OnModuleInit {
-  static readonly jobName = 'daily-forecast-update';
-  static readonly jobCronExpression = '0 0 * * *'; // at midnight every day
+export class ForecastUpdaterService implements OnApplicationBootstrap {
+  static readonly JOB_NAME = 'daily-forecast-update';
+  static readonly JOB_CRON_EXPRESSION = '0 0/3 * * *'; // every 3 hours
 
   private readonly logger = new Logger(ForecastUpdaterService.name);
 
@@ -24,7 +25,7 @@ export class ForecastUpdaterService implements OnModuleInit {
     private readonly temperaturesRepository: Repository<TemperatureEntity>,
   ) {}
 
-  async onModuleInit() {
+  async onApplicationBootstrap() {
     const {
       host,
       username: user,
@@ -44,20 +45,22 @@ export class ForecastUpdaterService implements OnModuleInit {
 
     boss.on('error', (error) => this.logger.error(error));
 
-    if (false) {
-      await boss.send(
-        ForecastUpdaterService.jobName,
-        {},
-        { singletonKey: 'out-of-schedule-update', retryLimit: 2 },
-      );
-    }
-
-    await boss.schedule(
-      ForecastUpdaterService.jobName,
-      ForecastUpdaterService.jobCronExpression,
+    await boss.send(
+      ForecastUpdaterService.JOB_NAME,
+      {},
+      {
+        singletonKey: 'force-update-on-startup',
+        singletonMinutes: 1, // if multiple replicas start at the same time
+        retryLimit: 2,
+      },
     );
 
-    await boss.work(ForecastUpdaterService.jobName, async () => {
+    await boss.schedule(
+      ForecastUpdaterService.JOB_NAME,
+      ForecastUpdaterService.JOB_CRON_EXPRESSION,
+    );
+
+    await boss.work(ForecastUpdaterService.JOB_NAME, async () => {
       await this.updateForecastForAllSupportedLocations();
     });
   }
@@ -77,6 +80,16 @@ export class ForecastUpdaterService implements OnModuleInit {
     name,
   }: LocationEntity) {
     try {
+      const shouldUpdateForecast = await this.shouldUpdateForecast(id);
+      if (!shouldUpdateForecast) {
+        this.logger.log(
+          `Skipping forecast update for '${name}' because it is already up to date.`,
+        );
+
+        return;
+      }
+
+      this.logger.log(`Updating forecast for '${name}'...`);
       const forecasts = await this.openWeatherApiService.fetchForecast({
         lat,
         lon,
@@ -94,5 +107,23 @@ export class ForecastUpdaterService implements OnModuleInit {
       this.logger.error(`Failed updating forecasts for '${name}'. ${err}`);
       throw err;
     }
+  }
+
+  async shouldUpdateForecast(locationId: number) {
+    const now = new Date();
+    const dateInFiveDays = addDays(now, 5);
+
+    const count = await this.temperaturesRepository.count({
+      where: {
+        locationId,
+        timestamp: Between(now, dateInFiveDays),
+      },
+    });
+
+    const expectedCount =
+      (OpenWeatherApiService.OPENWEATHERMAPAPI_FORECAST_DAYS * 24) /
+      OpenWeatherApiService.OPENWEATHERMAPAPI_TIMESTAMP_INTERVAL_HOURS;
+
+    return count < expectedCount;
   }
 }
