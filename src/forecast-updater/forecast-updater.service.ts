@@ -43,7 +43,7 @@ export class ForecastUpdaterService implements OnApplicationBootstrap {
 
     await boss.start();
 
-    boss.on('error', (error) => this.logger.error(error));
+    boss.on('error', (error) => this.logger.error({ error }, 'pgBoss error'));
 
     await boss.send(
       ForecastUpdaterService.JOB_NAME,
@@ -66,7 +66,6 @@ export class ForecastUpdaterService implements OnApplicationBootstrap {
   }
 
   async updateForecastForAllSupportedLocations() {
-    this.logger.log('Updating forecasts...');
     const locations = await this.locationsRepository.find();
     const promises = locations.map(this.updateForecastForLocation.bind(this));
 
@@ -83,13 +82,14 @@ export class ForecastUpdaterService implements OnApplicationBootstrap {
       const shouldUpdateForecast = await this.shouldUpdateForecast(id);
       if (!shouldUpdateForecast) {
         this.logger.log(
-          `Skipping forecast update for '${name}' because it is already up to date.`,
+          { input: { lat, lon, id, name } },
+          'Up-to-date forecast. Skipping...',
         );
 
         return;
       }
 
-      this.logger.log(`Updating forecast for '${name}'...`);
+      this.logger.log({ input: { name } }, 'Updating forecast...');
       const forecasts = await this.openWeatherApiService.fetchForecast({
         lat,
         lon,
@@ -102,9 +102,13 @@ export class ForecastUpdaterService implements OnApplicationBootstrap {
       }));
 
       await this.temperaturesRepository.save(entities);
-      this.logger.log(`Updated forecasts for '${name}'.`);
+      this.logger.log({ input: { name } }, 'Forecast updated');
     } catch (err) {
-      this.logger.error(`Failed updating forecasts for '${name}'. ${err}`);
+      this.logger.error(
+        { input: { name }, error: err },
+        'Failed to update forecasts',
+      );
+
       throw err;
     }
   }

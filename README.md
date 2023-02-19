@@ -15,7 +15,7 @@
 - Deploy
   - ~~IaC for AWS infrastructure and CI/CD~~
 - Touching up
-  - Structured logging
+  - ~~Structured logging~~
   - Error handling
   - Format responses (dates, temperatures...)
 

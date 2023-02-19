@@ -50,6 +50,8 @@ export class AppService {
   async getLocations(): Promise<LocationDto[]> {
     const locations = await this.locationsRepository.find();
 
+    this.logger.log({ result: locations }, 'Get all locations query executed');
+
     return locations.map(({ name, countryCode }) => ({
       name,
       countryCode,
@@ -62,11 +64,21 @@ export class AppService {
     cities,
     sort,
   }: GetAverageTemperatureParams): Promise<AverageTemperatureResponseDto[]> {
+    this.logger.log(
+      { input: { startDate, endDate, cities, sort } },
+      'Retrieving average temperature for time period',
+    );
+
     const locations = cities?.length
       ? await this.locationsRepository.find({
           where: { name: In([...cities]) },
         })
       : await this.locationsRepository.find();
+
+    this.logger.log(
+      { input: { cities }, result: locations },
+      'Get locations filtered by name query executed',
+    );
 
     if (!locations?.length) {
       throw new Error('No supported cities provided.');
@@ -99,6 +111,11 @@ export class AppService {
     const results =
       await queryWithSort.getRawMany<GetAverageTemperatureQueryResult>();
 
+    this.logger.log(
+      { input: { startDate, endDate }, result: results },
+      'Average temperature for time period query executed',
+    );
+
     return results.map(
       ({ location_name, location_country_code, average_temp }) => ({
         location: location_name,
@@ -114,6 +131,11 @@ export class AppService {
     locationName: name,
     countryCode,
   }: GetDailyTemperatureParams): Promise<DailyTemperatureResponseDto> {
+    this.logger.log(
+      { input: { startDate, endDate, name, countryCode } },
+      'Retrieving daily temperatures for time period',
+    );
+
     const location = await this.locationsRepository.findOne({
       where: {
         countryCode,
@@ -121,11 +143,16 @@ export class AppService {
       },
     });
 
+    this.logger.log(
+      { input: { name, countryCode }, result: location },
+      'Get location by name and countryCode query executed',
+    );
+
     if (!location) {
       throw new Error('Location not supported.'); // TODO: specific Error that's handled in controller
     }
 
-    const dailyForecast = await this.temperaturesRepository
+    const results = await this.temperaturesRepository
       .createQueryBuilder('temp')
       .select([
         'temp.location_id as location_id',
@@ -141,15 +168,18 @@ export class AppService {
       .orderBy('day', 'ASC')
       .getRawMany<GetDailyTemperatureQueryResult>();
 
+    this.logger.log(
+      { input: { startDate, endDate }, result: results },
+      'Daily temperatures for time period query executed',
+    );
+
     return {
       location: location.name,
       countryCode: location.countryCode,
-      forecast: dailyForecast.map(
-        ({ day, average_temp: averageTemperature }) => ({
-          day,
-          averageTemperature,
-        }),
-      ),
+      forecast: results.map(({ day, average_temp: averageTemperature }) => ({
+        day,
+        averageTemperature,
+      })),
     };
   }
 }
