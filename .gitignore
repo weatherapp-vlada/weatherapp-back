@@ -2,3 +2,14 @@ node_modules/
 .env
 dist/
 docker/data
+
+**/.terraform/
+**/.terraform.lock.hcl
+**/*.tfvars
+**/.terragrunt-cache/
+
+# because we use local tfstate
+tf/live/backend.tf
+**/terraform.tfstate
+**/.terraform.tfstate.lock.info
+**/terraform.tfstate.backup

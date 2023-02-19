@@ -3,6 +3,8 @@
 README.md
 docker
 dist
+buildspec.yml
+tf
 
 # Node Files #
 node_modules

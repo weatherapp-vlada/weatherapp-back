@@ -16,8 +16,10 @@ FROM base AS production
 
 ARG NODE_ENV=production
 
+EXPOSE 3000
+
 WORKDIR /usr/src/app
 
 COPY --from=development /usr/src/app/ .
 
-CMD [ "node", "dist/main" ]
+CMD [ "node", "dist/src/main" ]
