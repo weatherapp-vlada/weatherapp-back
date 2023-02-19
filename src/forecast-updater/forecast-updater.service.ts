@@ -2,12 +2,13 @@ import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as PgBoss from 'pg-boss';
-import { TypeormConfiguration } from 'src/config/db.config';
-import { LocationEntity } from 'src/entities/location.entity';
-import { TemperatureEntity } from 'src/entities/temperature.entity';
-import { OpenWeatherApiService } from 'src/open-weather-api/open-weather-api.service';
-import { addDays } from 'src/utils/date.utils';
 import { Between, Repository } from 'typeorm';
+import * as moment from 'moment';
+
+import { TypeormConfiguration } from '../config/db.config';
+import { LocationEntity } from '../entities/location.entity';
+import { TemperatureEntity } from '../entities/temperature.entity';
+import { OpenWeatherApiService } from '../open-weather-api/open-weather-api.service';
 
 @Injectable()
 export class ForecastUpdaterService implements OnApplicationBootstrap {
@@ -105,7 +106,12 @@ export class ForecastUpdaterService implements OnApplicationBootstrap {
       this.logger.log({ input: { name } }, 'Forecast updated');
     } catch (err) {
       this.logger.error(
-        { input: { name }, error: err },
+        {
+          input: { name },
+          error: {
+            message: err.message,
+          },
+        },
         'Failed to update forecasts',
       );
 
@@ -114,13 +120,16 @@ export class ForecastUpdaterService implements OnApplicationBootstrap {
   }
 
   async shouldUpdateForecast(locationId: number) {
-    const now = new Date();
-    const dateInFiveDays = addDays(now, 5);
+    const now = moment();
+    const inFiveDays = now.add(
+      OpenWeatherApiService.OPENWEATHERMAPAPI_FORECAST_DAYS,
+      'days',
+    );
 
     const count = await this.temperaturesRepository.count({
       where: {
         locationId,
-        timestamp: Between(now, dateInFiveDays),
+        timestamp: Between(now.toDate(), inFiveDays.toDate()),
       },
     });
 

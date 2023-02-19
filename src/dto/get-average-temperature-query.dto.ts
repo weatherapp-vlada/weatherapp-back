@@ -1,24 +1,24 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsDateString, IsOptional, Matches } from 'class-validator';
+import { IsBoolean, IsDateString, IsOptional, Validate } from 'class-validator';
+import { MatchesDatePatternConstraint } from 'src/utils/matches-date-pattern.validator';
+import { IsLessOrEqualConstraint } from 'src/utils/is-less-or-equal.validator';
 
 export class GetAverageTemperatureQuery {
   @ApiProperty()
   @IsDateString({ strict: true })
-  @Matches(/^\d{4}\-\d{2}\-\d{2}$/, {
-    message: 'endDate must be in YYYY-MM-dd format.',
-  })
+  @Validate(MatchesDatePatternConstraint)
+  @Validate(IsLessOrEqualConstraint, ['endDate'])
   startDate: string;
 
   @ApiProperty()
   @IsDateString({ strict: true })
-  @Matches(/^\d{4}\-\d{2}\-\d{2}$/, {
-    message: 'endDate must be in YYYY-MM-dd format.',
-  })
+  @Validate(MatchesDatePatternConstraint)
   endDate: string;
 
   @ApiPropertyOptional()
   @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   cities?: string[];
 
   @ApiPropertyOptional({ type: Boolean })

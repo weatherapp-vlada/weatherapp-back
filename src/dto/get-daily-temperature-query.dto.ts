@@ -4,22 +4,19 @@ import {
   IsString,
   IsUppercase,
   Length,
-  Matches,
+  Validate,
 } from 'class-validator';
+import { MatchesDatePatternConstraint } from 'src/utils/matches-date-pattern.validator';
 
 export class GetDailyTemperatureQuery {
   @ApiProperty()
   @IsDateString({ strict: true })
-  @Matches(/^\d{4}\-\d{2}\-\d{2}$/, {
-    message: 'endDate must be in YYYY-MM-dd format.',
-  })
+  @Validate(MatchesDatePatternConstraint)
   startDate: string;
 
   @ApiProperty()
   @IsDateString({ strict: true })
-  @Matches(/^\d{4}\-\d{2}\-\d{2}$/, {
-    message: 'endDate must be in YYYY-MM-dd format.',
-  })
+  @Validate(MatchesDatePatternConstraint)
   endDate: string;
 
   @ApiProperty()

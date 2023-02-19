@@ -3,8 +3,8 @@ import { HttpModule } from '@nestjs/axios';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { OpenWeatherApiService } from './open-weather-api.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { LocationEntity } from 'src/entities/location.entity';
-import { TemperatureEntity } from 'src/entities/temperature.entity';
+import { LocationEntity } from '../entities/location.entity';
+import { TemperatureEntity } from '../entities/temperature.entity';
 
 @Module({
   imports: [

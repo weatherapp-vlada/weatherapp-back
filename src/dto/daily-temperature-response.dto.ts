@@ -3,8 +3,7 @@ import { IsArray, IsDateString, IsNumber, IsString } from 'class-validator';
 
 export class SingleDayTemperatureDto {
   @ApiProperty({
-    type: Date,
-    example: '2023-02-18',
+    example: '2023-02-20',
   })
   @IsDateString()
   day: string;

@@ -16,8 +16,8 @@
   - ~~IaC for AWS infrastructure and CI/CD~~
 - Touching up
   - ~~Structured logging~~
-  - Error handling
-  - Format responses (dates, temperatures...)
+  - ~~Error handling~~
+  - ~~Format responses (date format, decimal points on numbers etc)~~
 
 # Starting app locally
 

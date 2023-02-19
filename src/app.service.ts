@@ -1,11 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
+import * as moment from 'moment';
 import { LocationEntity } from './entities/location.entity';
 import { LocationDto } from './dto/location.dto';
 import { TemperatureEntity } from './entities/temperature.entity';
 import { AverageTemperatureResponseDto } from './dto/average-temperature-response.dto';
 import { DailyTemperatureResponseDto } from './dto/daily-temperature-response.dto';
+import InvalidInputError from './exceptions/invalid-input.error';
+import NotFoundError from './exceptions/not-found.error';
 
 export interface GetAverageTemperatureParams {
   startDate: Date;
@@ -32,7 +35,7 @@ export interface GetDailyTemperatureQueryResult {
   location_id: string;
   location_name: string;
   location_country_code: string;
-  day: string;
+  day: Date;
   average_temp: number;
 }
 
@@ -69,11 +72,10 @@ export class AppService {
       'Retrieving average temperature for time period',
     );
 
-    const locations = cities?.length
-      ? await this.locationsRepository.find({
-          where: { name: In([...cities]) },
-        })
-      : await this.locationsRepository.find();
+    const whereClause = cities?.length ? { name: In([...cities]) } : undefined;
+    const locations = await this.locationsRepository.find({
+      where: whereClause,
+    });
 
     this.logger.log(
       { input: { cities }, result: locations },
@@ -81,7 +83,7 @@ export class AppService {
     );
 
     if (!locations?.length) {
-      throw new Error('No supported cities provided.');
+      throw new NotFoundError('No supported cities provided.');
     }
 
     const query = await this.temperaturesRepository
@@ -93,7 +95,7 @@ export class AppService {
       )
       .select([
         'temp.location_id as location_id',
-        'AVG(temp.temperature_celsius) as average_temp',
+        'ROUND(AVG(temp.temperature_celsius), 2) as average_temp',
         'location.name as location_name',
         'location.country_code as location_country_code',
       ])
@@ -149,14 +151,14 @@ export class AppService {
     );
 
     if (!location) {
-      throw new Error('Location not supported.'); // TODO: specific Error that's handled in controller
+      throw new InvalidInputError('Location not supported.');
     }
 
     const results = await this.temperaturesRepository
       .createQueryBuilder('temp')
       .select([
         'temp.location_id as location_id',
-        'AVG(temp.temperature_celsius) as average_temp',
+        'ROUND(AVG(temp.temperature_celsius), 2) as average_temp',
         `DATE_TRUNC('day', temp.timestamp) as day`,
       ])
       .where('location_id = :locationId', {
@@ -177,7 +179,7 @@ export class AppService {
       location: location.name,
       countryCode: location.countryCode,
       forecast: results.map(({ day, average_temp: averageTemperature }) => ({
-        day,
+        day: moment(day).format('YYYY-MM-DD'),
         averageTemperature,
       })),
     };
