@@ -9,6 +9,7 @@ import { AppService } from './app.service';
 import { LocationEntity } from './entities/location.entity';
 import { TemperatureEntity } from './entities/temperature.entity';
 import { ForecastUpdaterModule } from './forecast-updater/forecast-updater.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -21,10 +22,11 @@ import { ForecastUpdaterModule } from './forecast-updater/forecast-updater.modul
       useFactory: (configService: ConfigService) =>
         configService.get('database'),
     }),
-    OpenWeatherApiModule,
     TypeOrmModule.forFeature([LocationEntity]),
     TypeOrmModule.forFeature([TemperatureEntity]),
+    OpenWeatherApiModule,
     ForecastUpdaterModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

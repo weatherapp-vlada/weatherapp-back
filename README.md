@@ -6,6 +6,7 @@
   - ~~Add swagger~~
   - ~~Add ORM, setup DB and migrations~~
   - ~~Configure supported cities~~
+  - ~~Implement health checks~~
 - Implement business logic
   - ~~Implement OpenWeatherMapApi client~~
   - ~~Add endpoints for fetching weather data~~
@@ -14,7 +15,9 @@
 - Deploy
   - ~~IaC for AWS infrastructure and CI/CD~~
 - Touching up
-  - Format responses (dates, temperatures...), error handling and logging
+  - Structured logging
+  - Error handling
+  - Format responses (dates, temperatures...)
 
 # Starting app locally
 

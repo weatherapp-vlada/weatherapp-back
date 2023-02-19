@@ -242,7 +242,7 @@ resource "aws_elastic_beanstalk_environment" "beanstalkappenv" {
   setting {
       namespace = "aws:elasticbeanstalk:environment:process:default"
       name      = "HealthCheckPath"
-      value     = "/"
+      value     = "/health"
   }
 
   setting {
