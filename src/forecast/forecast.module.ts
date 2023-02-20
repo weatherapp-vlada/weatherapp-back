@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { LocationEntity, TemperatureEntity } from '../entities';
 import { ForecastController } from './forecast.controller';
+import { ForecastRepository } from './forecast.repository';
 import { ForecastService } from './forecast.service';
 
 @Module({
@@ -11,6 +12,6 @@ import { ForecastService } from './forecast.service';
     TypeOrmModule.forFeature([TemperatureEntity]),
   ],
   controllers: [ForecastController],
-  providers: [ForecastService],
+  providers: [ForecastService, ForecastRepository],
 })
 export class ForecastModule {}
