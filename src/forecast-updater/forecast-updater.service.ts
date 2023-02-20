@@ -120,15 +120,15 @@ export class ForecastUpdaterService implements OnApplicationBootstrap {
 
   async shouldUpdateForecast(locationId: number) {
     const now = moment();
-    const inFiveDays = now.add(
-      OpenWeatherApiService.OPENWEATHERMAPAPI_FORECAST_DAYS,
-      'days',
-    );
+    const currentDate = now.toDate();
+    const endOfMaxForecastDate = now
+      .add(OpenWeatherApiService.OPENWEATHERMAPAPI_FORECAST_DAYS, 'days')
+      .toDate();
 
     const count = await this.temperaturesRepository.count({
       where: {
         locationId,
-        timestamp: Between(now.toDate(), inFiveDays.toDate()),
+        timestamp: Between(currentDate, endOfMaxForecastDate),
       },
     });
 
