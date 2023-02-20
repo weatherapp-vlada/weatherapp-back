@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { OpenWeatherApiService } from './open-weather-api.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { LocationEntity } from '../entities/location.entity';
-import { TemperatureEntity } from '../entities/temperature.entity';
+
+import { OpenWeatherApiService } from './open-weather-api.service';
+import { LocationEntity, TemperatureEntity } from '../entities';
 
 @Module({
   imports: [

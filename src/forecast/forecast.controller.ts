@@ -5,33 +5,24 @@ import {
   NotFoundException,
   Query,
 } from '@nestjs/common';
-import { ApiExtraModels, ApiResponse } from '@nestjs/swagger';
+import { ApiExtraModels, ApiResponse, ApiTags } from '@nestjs/swagger';
 import * as moment from 'moment';
-import { AppService } from './app.service';
-import { AverageTemperatureResponseDto } from './dto/average-temperature-response.dto';
-import { DailyTemperatureResponseDto } from './dto/daily-temperature-response.dto';
-import { GetAverageTemperatureQuery } from './dto/get-average-temperature-query.dto';
-import { GetDailyTemperatureQuery } from './dto/get-daily-temperature-query.dto';
-import { LocationDto } from './dto/location.dto';
-import InvalidInputError from './exceptions/invalid-input.error';
-import NotFoundError from './exceptions/not-found.error';
 
-@Controller()
-export class AppController {
-  constructor(private readonly appService: AppService) {}
+import { ForecastService as ForecastService } from './forecast.service';
+import {
+  AverageTemperatureResponseDto,
+  DailyTemperatureResponseDto,
+  GetAverageTemperatureQuery,
+  GetDailyTemperatureQuery,
+} from '../dto';
+import { InvalidInputError, NotFoundError } from '../exceptions';
 
-  @Get('/locations')
-  @ApiExtraModels(LocationDto)
-  @ApiResponse({
-    status: 200,
-    isArray: true,
-    type: LocationDto,
-  })
-  getLocations(): Promise<LocationDto[]> {
-    return this.appService.getLocations();
-  }
+@ApiTags('Forecast')
+@Controller('temperature')
+export class ForecastController {
+  constructor(private readonly forecastService: ForecastService) {}
 
-  @Get('/temperature/average')
+  @Get('/average')
   @ApiExtraModels(AverageTemperatureResponseDto)
   @ApiResponse({
     status: 200,
@@ -43,7 +34,7 @@ export class AppController {
     { startDate, endDate, cities, sort }: GetAverageTemperatureQuery,
   ): Promise<AverageTemperatureResponseDto[]> {
     try {
-      return await this.appService.getAverageTemperature({
+      return await this.forecastService.getAverageTemperature({
         startDate: moment(startDate).toDate(),
         endDate: moment(endDate).add(1, 'days').toDate(),
         cities,
@@ -58,7 +49,7 @@ export class AppController {
     }
   }
 
-  @Get('/temperature/daily')
+  @Get('/daily')
   @ApiExtraModels(DailyTemperatureResponseDto)
   @ApiResponse({
     status: 200,
@@ -69,7 +60,7 @@ export class AppController {
     { startDate, endDate, locationName, countryCode }: GetDailyTemperatureQuery,
   ): Promise<DailyTemperatureResponseDto> {
     try {
-      return await this.appService.getDailyTemperature({
+      return await this.forecastService.getDailyTemperature({
         startDate: moment(startDate).toDate(),
         endDate: moment(endDate).add(1, 'days').toDate(),
         locationName,

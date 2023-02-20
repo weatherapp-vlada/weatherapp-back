@@ -6,8 +6,7 @@ import { Between, Repository } from 'typeorm';
 import * as moment from 'moment';
 
 import { TypeormConfiguration } from '../config/db.config';
-import { LocationEntity } from '../entities/location.entity';
-import { TemperatureEntity } from '../entities/temperature.entity';
+import { LocationEntity, TemperatureEntity } from '../entities';
 import { OpenWeatherApiService } from '../open-weather-api/open-weather-api.service';
 
 @Injectable()

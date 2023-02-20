@@ -6,7 +6,8 @@ import {
   Length,
   Validate,
 } from 'class-validator';
-import { MatchesDatePatternConstraint } from 'src/utils/matches-date-pattern.validator';
+
+import { MatchesDatePatternConstraint } from '../validators';
 
 export class GetDailyTemperatureQuery {
   @ApiProperty()

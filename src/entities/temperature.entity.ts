@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+
 import { LocationEntity } from './location.entity';
 
 @Entity({ name: 'temperature' })

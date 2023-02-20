@@ -2,13 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import * as moment from 'moment';
-import { LocationEntity } from './entities/location.entity';
-import { LocationDto } from './dto/location.dto';
-import { TemperatureEntity } from './entities/temperature.entity';
-import { AverageTemperatureResponseDto } from './dto/average-temperature-response.dto';
-import { DailyTemperatureResponseDto } from './dto/daily-temperature-response.dto';
-import InvalidInputError from './exceptions/invalid-input.error';
-import NotFoundError from './exceptions/not-found.error';
+
+import { LocationEntity, TemperatureEntity } from '../entities';
+import {
+  AverageTemperatureResponseDto,
+  DailyTemperatureResponseDto,
+} from '../dto';
+import { InvalidInputError, NotFoundError } from '../exceptions';
 
 export interface GetAverageTemperatureParams {
   startDate: Date;
@@ -40,8 +40,8 @@ export interface GetDailyTemperatureQueryResult {
 }
 
 @Injectable()
-export class AppService {
-  private readonly logger = new Logger(AppService.name);
+export class ForecastService {
+  private readonly logger = new Logger(ForecastService.name);
 
   constructor(
     @InjectRepository(LocationEntity)
@@ -49,17 +49,6 @@ export class AppService {
     @InjectRepository(TemperatureEntity)
     private readonly temperaturesRepository: Repository<TemperatureEntity>,
   ) {}
-
-  async getLocations(): Promise<LocationDto[]> {
-    const locations = await this.locationsRepository.find();
-
-    this.logger.log({ result: locations }, 'Get all locations query executed');
-
-    return locations.map(({ name, countryCode }) => ({
-      name,
-      countryCode,
-    }));
-  }
 
   async getAverageTemperature({
     startDate,

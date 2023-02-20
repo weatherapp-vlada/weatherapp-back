@@ -1,17 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { OpenWeatherApiModule } from './open-weather-api/open-weather-api.module';
 import { LoggerModule } from 'nestjs-pino';
 import { v4 as uuidv4 } from 'uuid';
 
 import dbConfig from './config/db.config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { LocationEntity } from './entities/location.entity';
-import { TemperatureEntity } from './entities/temperature.entity';
+import { OpenWeatherApiModule } from './open-weather-api/open-weather-api.module';
 import { ForecastUpdaterModule } from './forecast-updater/forecast-updater.module';
 import { HealthModule } from './health/health.module';
+import { LocationModule } from './location/location.module';
+import { ForecastModule } from './forecast/forecast.module';
 
 @Module({
   imports: [
@@ -31,13 +29,11 @@ import { HealthModule } from './health/health.module';
         quietReqLogger: true,
       },
     }),
-    TypeOrmModule.forFeature([LocationEntity]),
-    TypeOrmModule.forFeature([TemperatureEntity]),
     OpenWeatherApiModule,
     ForecastUpdaterModule,
     HealthModule,
+    LocationModule,
+    ForecastModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

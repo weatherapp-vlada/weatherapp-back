@@ -1,8 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsDateString, IsOptional, Validate } from 'class-validator';
-import { MatchesDatePatternConstraint } from 'src/utils/matches-date-pattern.validator';
-import { IsLessOrEqualConstraint } from 'src/utils/is-less-or-equal.validator';
+
+import {
+  IsLessOrEqualConstraint,
+  MatchesDatePatternConstraint,
+} from '../validators';
 
 export class GetAverageTemperatureQuery {
   @ApiProperty()
