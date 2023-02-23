@@ -1,20 +1,24 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
+import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { LocationDto } from '../dto';
-import { LocationEntity } from '../entities';
+import { LocationEntity } from '../entities/location.entity';
 
-@Injectable()
-export class LocationService {
-  private readonly logger = new Logger(LocationService.name);
+export class GetLocationsQuery {}
+
+@QueryHandler(GetLocationsQuery)
+export class GetLocationsQueryHandler
+  implements IQueryHandler<GetLocationsQuery>
+{
+  private readonly logger = new Logger(GetLocationsQueryHandler.name);
 
   constructor(
     @InjectRepository(LocationEntity)
     private readonly locationsRepository: Repository<LocationEntity>,
   ) {}
 
-  async getLocations(): Promise<LocationDto[]> {
+  async execute() {
     const locations = await this.locationsRepository.find();
 
     this.logger.log({ result: locations }, 'Get all locations query executed');

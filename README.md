@@ -19,8 +19,8 @@
   - [x] Error handling
   - [x] Format responses (date format, decimal points on numbers etc)
 - Refactor
-  - [ ] Create microservice Transport and Decorators for PgBoss (maybe create npm package `nestjs-pgboss`)
-  - [ ] Implement CQRS
+  - [x] Create microservice Transport and Decorators for PgBoss (maybe create npm package `nestjs-pgboss`)
+  - [x] Implement CQRS
   - [ ] Add more cities (take into account 1000 req/day and 60 req/sec OpenWeatherMap limits)
   - [ ] Cover project with tests and add them to CI/CD as quality gate
 - Metrics and K8s

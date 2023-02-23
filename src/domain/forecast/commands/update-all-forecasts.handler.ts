@@ -1,44 +1,30 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
+import { Logger } from '@nestjs/common';
 import * as moment from 'moment';
 
-import { LocationEntity, TemperatureEntity } from '../entities';
-import { OpenWeatherApiService } from '../open-weather-api/open-weather-api.service';
-import { PgBossClient } from '../pgboss/pgboss-client';
+import { LocationEntity } from '../../location/entities'; // TODO: fix cross entity reference
+import { OpenWeatherApiService } from '../../../open-weather-api/open-weather-api.service';
+import { TemperatureEntity } from '../entities';
 
-@Injectable()
-export class ForecastUpdaterService implements OnModuleInit {
-  static readonly JOB_NAME = 'daily-forecast-update';
-  static readonly JOB_CRON_EXPRESSION = '0 0/3 * * *'; // every 3 hours
+export class UpdateAllForecastsCommand {}
 
-  private readonly logger = new Logger(ForecastUpdaterService.name);
+@CommandHandler(UpdateAllForecastsCommand)
+export class UpdateAllForecastsCommandHandler
+  implements ICommandHandler<UpdateAllForecastsCommand>
+{
+  private readonly logger = new Logger(UpdateAllForecastsCommandHandler.name);
 
-  constructor(
+  public constructor(
     private readonly openWeatherApiService: OpenWeatherApiService,
-    private readonly pgBossClient: PgBossClient,
     @InjectRepository(LocationEntity)
     private readonly locationsRepository: Repository<LocationEntity>,
     @InjectRepository(TemperatureEntity)
     private readonly temperaturesRepository: Repository<TemperatureEntity>,
   ) {}
 
-  async onModuleInit() {
-    await this.pgBossClient.emit(ForecastUpdaterService.JOB_NAME, {
-      options: {
-        singletonKey: 'force-update-on-startup',
-        singletonMinutes: 1, // if multiple replicas start at the same time
-        retryLimit: 2,
-      },
-    });
-
-    await this.pgBossClient.scheduleEvent({
-      pattern: ForecastUpdaterService.JOB_NAME,
-      cron: ForecastUpdaterService.JOB_CRON_EXPRESSION,
-    });
-  }
-
-  async updateForecastForAllSupportedLocations() {
+  public async execute(): Promise<void> {
     const locations = await this.locationsRepository.find();
     const promises = locations.map(this.updateForecastForLocation.bind(this));
 

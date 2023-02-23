@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 
-import { LocationEntity } from './location.entity';
+import { LocationEntity } from '../../location/entities'; // TODO: fix cross entity reference
 
 @Entity({ name: 'temperature' })
 export class TemperatureEntity {

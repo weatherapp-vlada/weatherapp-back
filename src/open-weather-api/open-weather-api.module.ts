@@ -1,10 +1,8 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { OpenWeatherApiService } from './open-weather-api.service';
-import { LocationEntity, TemperatureEntity } from '../entities';
 
 @Module({
   imports: [
@@ -19,7 +17,6 @@ import { LocationEntity, TemperatureEntity } from '../entities';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([LocationEntity, TemperatureEntity]),
   ],
   providers: [OpenWeatherApiService],
   exports: [OpenWeatherApiService],

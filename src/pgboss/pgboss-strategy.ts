@@ -5,7 +5,7 @@ import {
   Server,
 } from '@nestjs/microservices';
 import * as PgBoss from 'pg-boss';
-import { TypeormConfiguration } from 'src/config/db.config';
+import { TypeormConfiguration } from '../config/db.config';
 
 export class PgBossTransportStrategy
   extends Server

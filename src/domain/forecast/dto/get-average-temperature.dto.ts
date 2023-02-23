@@ -5,9 +5,9 @@ import { IsBoolean, IsDateString, IsOptional, Validate } from 'class-validator';
 import {
   IsLessOrEqualConstraint,
   MatchesDatePatternConstraint,
-} from '../validators';
+} from '../../../validators';
 
-export class GetAverageTemperatureQuery {
+export class GetAverageTemperatureDto {
   @ApiProperty()
   @IsDateString({ strict: true })
   @Validate(MatchesDatePatternConstraint)

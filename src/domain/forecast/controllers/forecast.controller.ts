@@ -6,16 +6,17 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiExtraModels, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { EventPattern } from '@nestjs/microservices';
 import * as moment from 'moment';
 
-import { ForecastService as ForecastService } from './forecast.service';
+import { ForecastService as ForecastService } from '../services/forecast.service';
+import { InvalidInputError, NotFoundError } from '../../../exceptions';
 import {
   AverageTemperatureResponseDto,
   DailyTemperatureResponseDto,
-  GetAverageTemperatureQuery,
-  GetDailyTemperatureQuery,
+  GetAverageTemperatureDto,
+  GetDailyTemperatureDto,
 } from '../dto';
-import { InvalidInputError, NotFoundError } from '../exceptions';
 
 @ApiTags('Forecast')
 @Controller('temperature')
@@ -31,7 +32,7 @@ export class ForecastController {
   })
   async getAverageTemperature(
     @Query()
-    { startDate, endDate, cities, sort }: GetAverageTemperatureQuery,
+    { startDate, endDate, cities, sort }: GetAverageTemperatureDto,
   ): Promise<AverageTemperatureResponseDto[]> {
     try {
       return await this.forecastService.getAverageTemperature({
@@ -57,7 +58,7 @@ export class ForecastController {
   })
   async getDailyTemperature(
     @Query()
-    { startDate, endDate, locationName, countryCode }: GetDailyTemperatureQuery,
+    { startDate, endDate, locationName, countryCode }: GetDailyTemperatureDto,
   ): Promise<DailyTemperatureResponseDto> {
     try {
       return await this.forecastService.getDailyTemperature({
@@ -73,5 +74,10 @@ export class ForecastController {
 
       throw err;
     }
+  }
+
+  @EventPattern(ForecastService.JOB_NAME)
+  async updateForecastForAllSupportedLocations() {
+    await this.forecastService.updateForecastForAllSupportedLocations();
   }
 }

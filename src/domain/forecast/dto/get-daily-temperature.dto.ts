@@ -7,9 +7,9 @@ import {
   Validate,
 } from 'class-validator';
 
-import { MatchesDatePatternConstraint } from '../validators';
+import { MatchesDatePatternConstraint } from '../../../validators';
 
-export class GetDailyTemperatureQuery {
+export class GetDailyTemperatureDto {
   @ApiProperty()
   @IsDateString({ strict: true })
   @Validate(MatchesDatePatternConstraint)

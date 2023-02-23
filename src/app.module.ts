@@ -6,10 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 import dbConfig from './config/db.config';
 import { OpenWeatherApiModule } from './open-weather-api/open-weather-api.module';
-import { ForecastUpdaterModule } from './forecast-updater/forecast-updater.module';
 import { HealthModule } from './health/health.module';
-import { LocationModule } from './location/location.module';
-import { ForecastModule } from './forecast/forecast.module';
+import { LocationModule } from './domain/location/location.module';
+import { ForecastModule } from './domain/forecast/forecast.module';
 import { PgBossModule } from './pgboss/pgboss.module';
 
 @Module({
@@ -31,7 +30,6 @@ import { PgBossModule } from './pgboss/pgboss.module';
       },
     }),
     OpenWeatherApiModule,
-    ForecastUpdaterModule,
     HealthModule,
     LocationModule,
     ForecastModule,
