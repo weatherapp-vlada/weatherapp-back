@@ -7,10 +7,7 @@ import { ForecastRepository } from './forecast.repository';
 import { ForecastService } from './forecast.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([LocationEntity]),
-    TypeOrmModule.forFeature([TemperatureEntity]),
-  ],
+  imports: [TypeOrmModule.forFeature([LocationEntity, TemperatureEntity])],
   controllers: [ForecastController],
   providers: [ForecastService, ForecastRepository],
 })

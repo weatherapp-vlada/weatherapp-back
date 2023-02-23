@@ -10,8 +10,7 @@ import { ForecastUpdaterService } from './forecast-updater.service';
   imports: [
     OpenWeatherApiModule,
     ConfigModule,
-    TypeOrmModule.forFeature([LocationEntity]),
-    TypeOrmModule.forFeature([TemperatureEntity]),
+    TypeOrmModule.forFeature([LocationEntity, TemperatureEntity]),
   ],
   providers: [ForecastUpdaterService],
 })

@@ -1,4 +1,7 @@
 version: '3.8'
+
+name: weatherapp
+
 services:
   app:
     build:

@@ -43,7 +43,7 @@ export class ForecastUpdaterService implements OnApplicationBootstrap {
 
     await boss.start();
 
-    boss.on('error', (error) => this.logger.error({ error }, 'pgBoss error'));
+    boss.on('error', (error) => this.logger.error({ error }));
 
     await boss.send(
       ForecastUpdaterService.JOB_NAME,
@@ -60,9 +60,10 @@ export class ForecastUpdaterService implements OnApplicationBootstrap {
       ForecastUpdaterService.JOB_CRON_EXPRESSION,
     );
 
-    await boss.work(ForecastUpdaterService.JOB_NAME, async () => {
-      await this.updateForecastForAllSupportedLocations();
-    });
+    await boss.work(
+      ForecastUpdaterService.JOB_NAME,
+      this.updateForecastForAllSupportedLocations,
+    );
   }
 
   async updateForecastForAllSupportedLocations() {
