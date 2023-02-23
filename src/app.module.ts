@@ -10,6 +10,7 @@ import { ForecastUpdaterModule } from './forecast-updater/forecast-updater.modul
 import { HealthModule } from './health/health.module';
 import { LocationModule } from './location/location.module';
 import { ForecastModule } from './forecast/forecast.module';
+import { PgBossModule } from './pgboss/pgboss.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ForecastModule } from './forecast/forecast.module';
     HealthModule,
     LocationModule,
     ForecastModule,
+    PgBossModule,
   ],
 })
 export class AppModule {}

@@ -1,69 +1,41 @@
-import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as PgBoss from 'pg-boss';
 import { Between, Repository } from 'typeorm';
 import * as moment from 'moment';
 
-import { TypeormConfiguration } from '../config/db.config';
 import { LocationEntity, TemperatureEntity } from '../entities';
 import { OpenWeatherApiService } from '../open-weather-api/open-weather-api.service';
+import { PgBossClient } from '../pgboss/pgboss-client';
 
 @Injectable()
-export class ForecastUpdaterService implements OnApplicationBootstrap {
+export class ForecastUpdaterService implements OnModuleInit {
   static readonly JOB_NAME = 'daily-forecast-update';
   static readonly JOB_CRON_EXPRESSION = '0 0/3 * * *'; // every 3 hours
 
   private readonly logger = new Logger(ForecastUpdaterService.name);
 
   constructor(
-    private readonly configService: ConfigService,
     private readonly openWeatherApiService: OpenWeatherApiService,
+    private readonly pgBossClient: PgBossClient,
     @InjectRepository(LocationEntity)
     private readonly locationsRepository: Repository<LocationEntity>,
     @InjectRepository(TemperatureEntity)
     private readonly temperaturesRepository: Repository<TemperatureEntity>,
   ) {}
 
-  async onApplicationBootstrap() {
-    const {
-      host,
-      username: user,
-      password,
-      database,
-      port,
-    } = this.configService.get<TypeormConfiguration>('database');
-    const boss = new PgBoss({
-      host,
-      user,
-      password,
-      database,
-      port,
-    });
-
-    await boss.start();
-
-    boss.on('error', (error) => this.logger.error({ error }));
-
-    await boss.send(
-      ForecastUpdaterService.JOB_NAME,
-      {},
-      {
+  async onModuleInit() {
+    await this.pgBossClient.emit(ForecastUpdaterService.JOB_NAME, {
+      options: {
         singletonKey: 'force-update-on-startup',
         singletonMinutes: 1, // if multiple replicas start at the same time
         retryLimit: 2,
       },
-    );
+    });
 
-    await boss.schedule(
-      ForecastUpdaterService.JOB_NAME,
-      ForecastUpdaterService.JOB_CRON_EXPRESSION,
-    );
-
-    await boss.work(
-      ForecastUpdaterService.JOB_NAME,
-      this.updateForecastForAllSupportedLocations,
-    );
+    await this.pgBossClient.scheduleEvent({
+      pattern: ForecastUpdaterService.JOB_NAME,
+      cron: ForecastUpdaterService.JOB_CRON_EXPRESSION,
+    });
   }
 
   async updateForecastForAllSupportedLocations() {

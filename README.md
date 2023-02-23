@@ -24,8 +24,9 @@
   - [ ] Add more cities (take into account 1000 req/day and 60 req/sec OpenWeatherMap limits)
   - [ ] Cover project with tests and add them to CI/CD as quality gate
 - Metrics and K8s
-  - [ ] Add metrics using Prometheus
   - [ ] Deploy to EKS using GitOps (ArgoCD) and IaC
+  - [ ] Add metrics using Prometheus
+  - [ ] Implement graceful shutdown with shutdown hooks
 - User microservice
   - [ ] Add auth (AWS Cognito)
   - [ ] Add feature for users to create their own dashboards with forecasts and notification triggers (AWS SES)
