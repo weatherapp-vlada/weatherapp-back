@@ -1,16 +1,28 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
-export class AverageTemperatureResponseDto {
+export class SingleDayAverageTemperature {
   @ApiProperty()
-  @IsString()
   location: string;
 
   @ApiProperty()
-  @IsString()
   countryCode: string;
 
   @ApiProperty()
-  @IsNumber()
+  @Transform(({ value }: { value: number }) => Number(value.toFixed(2)), {
+    toPlainOnly: true,
+  })
   averageTemperature: number;
+}
+
+export class AverageTemperatureResponseDto {
+  @ApiProperty()
+  count: number;
+
+  @ApiProperty({
+    type: SingleDayAverageTemperature,
+    isArray: true,
+  })
+  @Type(() => SingleDayAverageTemperature)
+  locations: SingleDayAverageTemperature[];
 }

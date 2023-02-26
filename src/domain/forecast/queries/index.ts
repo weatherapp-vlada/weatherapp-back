@@ -5,3 +5,7 @@ export const QueriesHandlers = [
   GetAverageTemperatureQueryHandler,
   GetDailyTemperatureQueryHandler,
 ];
+
+export * from './get-average-temperature.handler';
+
+export * from './get-daily-temperature.handler';

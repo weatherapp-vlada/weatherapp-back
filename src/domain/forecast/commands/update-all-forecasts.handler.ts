@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { Logger } from '@nestjs/common';
-import * as moment from 'moment';
+import { utc } from 'moment';
 
 import { LocationEntity } from '../../location/entities'; // TODO: fix cross entity reference
 import { OpenWeatherApiService } from '../../../open-weather-api/open-weather-api.service';
@@ -78,16 +78,16 @@ export class UpdateAllForecastsCommandHandler
   }
 
   async shouldUpdateForecast(locationId: number) {
-    const now = moment();
-    const currentDate = now.toDate();
-    const endOfMaxForecastDate = now
-      .add(OpenWeatherApiService.OPENWEATHERMAPAPI_FORECAST_DAYS, 'days')
-      .toDate();
+    const now = utc();
+    const endOfMaxForecastDate = now.add(
+      OpenWeatherApiService.OPENWEATHERMAPAPI_FORECAST_DAYS,
+      'days',
+    );
 
     const count = await this.temperaturesRepository.count({
       where: {
         locationId,
-        timestamp: Between(currentDate, endOfMaxForecastDate),
+        timestamp: Between(now.toDate(), endOfMaxForecastDate.toDate()),
       },
     });
 

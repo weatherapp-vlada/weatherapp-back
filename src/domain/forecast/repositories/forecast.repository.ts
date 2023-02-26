@@ -1,7 +1,9 @@
-import { DataSource, Repository } from 'typeorm';
+import { Between, DataSource, Repository } from 'typeorm';
 import { Injectable, Logger } from '@nestjs/common';
+import { plainToInstance, Type } from 'class-transformer';
 
 import { TemperatureEntity } from '../entities';
+import { DailyTemperatureEntity } from '../entities/daily-temperature.entity';
 
 interface GetAverageTemperatureParams {
   startDate: Date;
@@ -10,10 +12,12 @@ interface GetAverageTemperatureParams {
   sort: boolean;
 }
 
-interface GetAverageTemperatureQueryResult {
+class GetAverageTemperatureQueryResult {
   location_id: string;
   location_name: string;
   location_country_code: string;
+
+  @Type(() => Number)
   average_temp: number;
 }
 
@@ -23,19 +27,11 @@ interface GetDailyTemperatureParams {
   locationId: number;
 }
 
-interface GetDailyTemperatureQueryResult {
-  location_id: string;
-  location_name: string;
-  location_country_code: string;
-  day: Date;
-  average_temp: number;
-}
-
 @Injectable()
 export class ForecastRepository extends Repository<TemperatureEntity> {
   private readonly logger = new Logger(ForecastRepository.name);
 
-  constructor(private readonly dataSource: DataSource) {
+  constructor(dataSource: DataSource) {
     super(TemperatureEntity, dataSource.createEntityManager());
   }
 
@@ -60,50 +56,48 @@ export class ForecastRepository extends Repository<TemperatureEntity> {
       .where('location_id IN (:...ids)', {
         ids: locationIds,
       })
-      .andWhere('temp.timestamp >= :startDate', { startDate })
-      .andWhere('temp.timestamp < :endDate', { endDate })
+      .andWhere('temp.timestamp BETWEEN :startDate AND :endDate', {
+        startDate,
+        endDate,
+      })
       .groupBy('location_id, location_name, location_country_code');
 
     const queryWithSort = !sort
       ? query
       : query.addOrderBy('average_temp', 'DESC');
 
-    const results =
-      await queryWithSort.getRawMany<GetAverageTemperatureQueryResult>();
+    const results = await queryWithSort.getRawMany();
 
     this.logger.log(
       { input: { startDate, endDate }, result: results },
       'Average temperature for time period query executed',
     );
 
-    return results;
+    return results.map((item) =>
+      plainToInstance(GetAverageTemperatureQueryResult, item),
+    );
   }
 
   async getDailyTemperatures({
     locationId,
     startDate,
     endDate,
-  }: GetDailyTemperatureParams): Promise<GetDailyTemperatureQueryResult[]> {
-    const results = await this.createQueryBuilder('temp')
-      .select([
-        'temp.location_id as location_id',
-        'ROUND(AVG(temp.temperature_celsius), 2) as average_temp',
-        `DATE_TRUNC('day', temp.timestamp) as day`,
-      ])
-      .where('location_id = :locationId', {
-        locationId,
-      })
-      .andWhere('temp.timestamp >= :startDate', { startDate })
-      .andWhere('temp.timestamp < :endDate', { endDate })
-      .groupBy('location_id, day')
-      .orderBy('day', 'ASC')
-      .getRawMany<GetDailyTemperatureQueryResult>();
+  }: GetDailyTemperatureParams): Promise<DailyTemperatureEntity[]> {
+    const results = await this.manager.find(DailyTemperatureEntity, {
+      where: {
+        location_id: locationId,
+        day: Between(startDate, endDate),
+      },
+      order: {
+        day: 'ASC',
+      },
+    });
 
     this.logger.log(
       { input: { startDate, endDate }, result: results },
       'Daily temperatures for time period query executed',
     );
 
-    return results;
+    return results.map((item) => plainToInstance(DailyTemperatureEntity, item));
   }
 }

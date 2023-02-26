@@ -6,6 +6,7 @@ import { In, Repository } from 'typeorm';
 import { LocationEntity } from '../../location/entities'; // TODO: fix cross entity reference
 import { ForecastRepository } from '../repositories/forecast.repository';
 import { NotFoundError } from '../../../exceptions';
+import { AverageTemperatureResponseDto } from '../dto';
 
 export class GetAverageTemperatureQuery {
   public constructor(
@@ -18,7 +19,8 @@ export class GetAverageTemperatureQuery {
 
 @QueryHandler(GetAverageTemperatureQuery)
 export class GetAverageTemperatureQueryHandler
-  implements IQueryHandler<GetAverageTemperatureQuery>
+  implements
+    IQueryHandler<GetAverageTemperatureQuery, AverageTemperatureResponseDto>
 {
   private readonly logger = new Logger(GetAverageTemperatureQuery.name);
 
@@ -34,15 +36,14 @@ export class GetAverageTemperatureQueryHandler
     endDate,
     cities,
     sort,
-  }: GetAverageTemperatureQuery) {
+  }: GetAverageTemperatureQuery): Promise<AverageTemperatureResponseDto> {
     this.logger.log(
       { input: { startDate, endDate, cities, sort } },
       'Retrieving average temperature for time period',
     );
 
-    const where = cities?.length ? { name: In([...cities]) } : undefined;
     const locations = await this.locationsRepository.find({
-      where,
+      where: { ...(!cities?.length ? {} : { name: In([...cities]) }) },
     });
 
     this.logger.log(
@@ -61,12 +62,13 @@ export class GetAverageTemperatureQueryHandler
       sort,
     });
 
-    return results.map(
-      ({ location_name, location_country_code, average_temp }) => ({
-        location: location_name,
-        countryCode: location_country_code,
-        averageTemperature: average_temp,
-      }),
-    );
+    return {
+      count: results.length,
+      locations: results.map((item) => ({
+        averageTemperature: item.average_temp,
+        countryCode: item.location_country_code,
+        location: item.location_name,
+      })),
+    };
   }
 }

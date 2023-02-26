@@ -1,23 +1,24 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsDateString, IsOptional, Validate } from 'class-validator';
+import { IsBoolean, IsOptional, Validate } from 'class-validator';
 
-import {
-  IsLessOrEqualConstraint,
-  MatchesDatePatternConstraint,
-} from '../../../validators';
+import { IsLessOrEqualConstraint } from '../../../validators';
 
 export class GetAverageTemperatureDto {
-  @ApiProperty()
-  @IsDateString({ strict: true })
-  @Validate(MatchesDatePatternConstraint)
+  @ApiProperty({
+    type: Date,
+  }) // TODO: validations
+  // @IsDateString({ strict: true })
+  // @Validate(MatchesDatePatternConstraint)
   @Validate(IsLessOrEqualConstraint, ['endDate'])
-  startDate: string;
+  startDate: Date;
 
-  @ApiProperty()
-  @IsDateString({ strict: true })
-  @Validate(MatchesDatePatternConstraint)
-  endDate: string;
+  @ApiProperty({
+    type: Date,
+  })
+  // @IsDateString({ strict: true })
+  // @Validate(MatchesDatePatternConstraint)
+  endDate: Date;
 
   @ApiPropertyOptional()
   @IsOptional()

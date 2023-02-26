@@ -19,24 +19,29 @@
   - [x] Error handling
   - [x] Format responses (date format, decimal points on numbers etc)
 - Refactor
-  - [x] Create microservice Transport and Decorators for PgBoss (maybe create npm package `nestjs-pgboss`)
+  - [x] Create microservice TransportStrategy and Client for PgBoss
   - [x] Implement CQRS
+  - [ ] ~~Switch from TypeORM to Prisma~~ **(too buggy on M1)**
+  - [x] Single responsibility principle when it comes to transforming DTOs
+  - [ ] Cover project with tests and add them to CI/CD as quality check
+- Business logic
+  - [ ] Return all data points to display graph of temperature changes and weather conditions (similar to what google shows when you search "Belgrade weather")
+  - [ ] Add pollen and air pollution data points
   - [ ] Add more cities (take into account 1000 req/day and 60 req/sec OpenWeatherMap limits)
-  - [ ] Cover project with tests and add them to CI/CD as quality gate
 - Metrics and K8s
   - [ ] Deploy to EKS using GitOps (ArgoCD) and IaC
   - [ ] Add metrics using Prometheus
-  - [ ] Implement graceful shutdown with shutdown hooks
+  - [ ] Implement graceful shutdown with shutdown hooks (also check some notes on Prisma interaction with Nest shutdown hooks)
 - User microservice
   - [ ] Add auth (AWS Cognito)
-  - [ ] Add feature for users to create their own dashboards with forecasts and notification triggers (AWS SES)
+  - [ ] Add feature for users to create their own dashboards with forecasts and notification triggers (AWS SES, take into account 11 (?) mails/sec)
   - [ ] Add Kafka for messaging (deploy inside K8s using Strimzi)
   - [ ] Implement Saga distributed transaction (use-case TBD, maybe will require 3rd microservice)
   - [ ] Add Redis for caching (and replace PgBoss with `@nestjs/bull`?)
   - [ ] Outbox pattern and resilience
 - Frontend
-  - Implement Frontend in NextJS (D3.js for some graph visualization)
-  - Add GraphQL Backend for frontend? Replace REST API on microservices with GraphQL?
+  - [ ] Implement Frontend in NextJS (D3.js for some graph visualization)
+  - [ ] Add GraphQL Backend for frontend? Replace REST API on microservices with GraphQL?
 
 # Starting app locally
 
@@ -75,9 +80,9 @@ Application is deployed (using terraform code in `tf` folder) at https://weather
 }
 ```
 
-5. Install `terraform`, `terragrunt` and `aws` cli tool
-6. Configure `aws` tool
-7. In `./tf` folder check all `*.hcl` files and update inputs if needed (like `github_connection_arn`, `github_repo`, `domain_name`, `zone_name`, name of your secret created in step 4 etc)
-8. In `./tf/live` folder run `terragrunt run-all apply`
+6. Install `terraform`, `terragrunt` and `aws` cli tool
+7. Configure `aws` tool
+8. In `./tf` folder check all `*.hcl` files and update inputs if needed (like `github_connection_arn`, `github_repo`, `domain_name`, `zone_name`, name of your secret created in step 4 etc)
+9. In `./tf/live` folder run `terragrunt run-all apply`
 
 To destroy all AWS resources run `terragrunt run-all destroy`

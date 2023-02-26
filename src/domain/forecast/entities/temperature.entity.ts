@@ -4,7 +4,9 @@ import { LocationEntity } from '../../location/entities'; // TODO: fix cross ent
 
 @Entity({ name: 'temperature' })
 export class TemperatureEntity {
-  @PrimaryColumn()
+  @PrimaryColumn({
+    type: Date,
+  })
   timestamp: Date;
 
   @PrimaryColumn({ name: 'location_id' })

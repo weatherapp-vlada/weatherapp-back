@@ -1,24 +1,23 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsDateString,
-  IsString,
-  IsUppercase,
-  Length,
-  Validate,
-} from 'class-validator';
-
-import { MatchesDatePatternConstraint } from '../../../validators';
+import { Type } from 'class-transformer';
+import { IsString, IsUppercase, Length } from 'class-validator';
 
 export class GetDailyTemperatureDto {
-  @ApiProperty()
-  @IsDateString({ strict: true })
-  @Validate(MatchesDatePatternConstraint)
-  startDate: string;
+  @ApiProperty({
+    type: Date,
+  }) // TODO: validations
+  // @IsDateString({ strict: true })
+  // @Validate(MatchesDatePatternConstraint)
+  @Type(() => Date)
+  startDate: Date;
 
-  @ApiProperty()
-  @IsDateString({ strict: true })
-  @Validate(MatchesDatePatternConstraint)
-  endDate: string;
+  @ApiProperty({
+    type: Date,
+  })
+  // @IsDateString({ strict: true })
+  // @Validate(MatchesDatePatternConstraint)
+  @Type(() => Date)
+  endDate: Date;
 
   @ApiProperty()
   @IsString()

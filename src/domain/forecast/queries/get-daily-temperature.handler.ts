@@ -1,12 +1,12 @@
 import { Logger } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as moment from 'moment';
 import { Repository } from 'typeorm';
 
 import { LocationEntity } from '../../location/entities'; // TODO: fix cross entity reference
 import { ForecastRepository } from '../repositories/forecast.repository';
 import { InvalidInputError } from '../../../exceptions';
+import { DailyTemperatureResponseDto } from '../dto';
 
 export class GetDailyTemperatureQuery {
   public constructor(
@@ -19,7 +19,8 @@ export class GetDailyTemperatureQuery {
 
 @QueryHandler(GetDailyTemperatureQuery)
 export class GetDailyTemperatureQueryHandler
-  implements IQueryHandler<GetDailyTemperatureQuery>
+  implements
+    IQueryHandler<GetDailyTemperatureQuery, DailyTemperatureResponseDto>
 {
   private readonly logger = new Logger(GetDailyTemperatureQuery.name);
 
@@ -35,7 +36,7 @@ export class GetDailyTemperatureQueryHandler
     endDate,
     locationName: name,
     countryCode,
-  }: GetDailyTemperatureQuery) {
+  }: GetDailyTemperatureQuery): Promise<DailyTemperatureResponseDto> {
     this.logger.log(
       { input: { startDate, endDate, name, countryCode } },
       'Retrieving daily temperatures for time period',
@@ -67,7 +68,7 @@ export class GetDailyTemperatureQueryHandler
       location: location.name,
       countryCode: location.countryCode,
       forecast: results.map(({ day, average_temp: averageTemperature }) => ({
-        day: moment(day).format('YYYY-MM-DD'),
+        day,
         averageTemperature,
       })),
     };

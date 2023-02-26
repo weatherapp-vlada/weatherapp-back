@@ -1,31 +1,34 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsDateString, IsNumber, IsString } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { utc } from 'moment';
 
 export class SingleDayTemperatureDto {
   @ApiProperty({
     example: '2023-02-20',
   })
-  @IsDateString()
-  day: string;
+  @Transform(({ value }: { value: Date }) => utc(value).format('YYYY-MM-DD'), {
+    toPlainOnly: true,
+  })
+  day: Date;
 
   @ApiProperty()
-  @IsNumber()
+  @Transform(({ value }: { value: number }) => Number(value.toFixed(2)), {
+    toPlainOnly: true,
+  })
   averageTemperature: number;
 }
 
 export class DailyTemperatureResponseDto {
   @ApiProperty()
-  @IsString()
   location: string;
 
   @ApiProperty()
-  @IsString()
   countryCode: string;
 
   @ApiProperty({
     type: SingleDayTemperatureDto,
     isArray: true,
   })
-  @IsArray()
+  @Type(() => SingleDayTemperatureDto)
   forecast: SingleDayTemperatureDto[];
 }

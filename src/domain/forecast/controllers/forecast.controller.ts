@@ -4,12 +4,14 @@ import {
   Get,
   NotFoundException,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiExtraModels, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { EventPattern } from '@nestjs/microservices';
-import * as moment from 'moment';
+import { utc } from 'moment';
+import { plainToInstance } from 'class-transformer';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
-import { ForecastService as ForecastService } from '../services/forecast.service';
 import { InvalidInputError, NotFoundError } from '../../../exceptions';
 import {
   AverageTemperatureResponseDto,
@@ -17,11 +19,21 @@ import {
   GetAverageTemperatureDto,
   GetDailyTemperatureDto,
 } from '../dto';
+import {
+  GetAverageTemperatureQuery,
+  GetDailyTemperatureQuery,
+} from '../queries';
+import { UpdateAllForecastsCommand } from '../commands/update-all-forecasts.handler';
+import { PGBOSS_JOB_NAME } from '../utils/constants';
+import { TransformInterceptor } from 'src/interceptors/transform-interceptor';
 
 @ApiTags('Forecast')
 @Controller('temperature')
 export class ForecastController {
-  constructor(private readonly forecastService: ForecastService) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   @Get('/average')
   @ApiExtraModels(AverageTemperatureResponseDto)
@@ -30,17 +42,25 @@ export class ForecastController {
     isArray: true,
     type: AverageTemperatureResponseDto,
   })
+  @UseInterceptors(TransformInterceptor)
   async getAverageTemperature(
     @Query()
     { startDate, endDate, cities, sort }: GetAverageTemperatureDto,
-  ): Promise<AverageTemperatureResponseDto[]> {
+  ): Promise<AverageTemperatureResponseDto> {
     try {
-      return await this.forecastService.getAverageTemperature({
-        startDate: moment(startDate).toDate(),
-        endDate: moment(endDate).add(1, 'days').toDate(),
-        cities,
-        sort,
-      });
+      const result = await this.queryBus.execute<
+        GetAverageTemperatureQuery,
+        AverageTemperatureResponseDto
+      >(
+        new GetAverageTemperatureQuery(
+          utc(startDate).startOf('d').toDate(),
+          utc(endDate).endOf('d').toDate(),
+          cities,
+          sort,
+        ),
+      );
+
+      return plainToInstance(AverageTemperatureResponseDto, result);
     } catch (err) {
       if (err instanceof NotFoundError) {
         throw new NotFoundException(null, err.message);
@@ -56,17 +76,25 @@ export class ForecastController {
     status: 200,
     type: DailyTemperatureResponseDto,
   })
+  @UseInterceptors(TransformInterceptor)
   async getDailyTemperature(
     @Query()
     { startDate, endDate, locationName, countryCode }: GetDailyTemperatureDto,
   ): Promise<DailyTemperatureResponseDto> {
     try {
-      return await this.forecastService.getDailyTemperature({
-        startDate: moment(startDate).toDate(),
-        endDate: moment(endDate).add(1, 'days').toDate(),
-        locationName,
-        countryCode,
-      });
+      const result = await this.queryBus.execute<
+        GetDailyTemperatureQuery,
+        DailyTemperatureResponseDto
+      >(
+        new GetDailyTemperatureQuery(
+          utc(startDate).startOf('d').toDate(),
+          utc(endDate).endOf('d').toDate(),
+          locationName,
+          countryCode,
+        ),
+      );
+
+      return plainToInstance(DailyTemperatureResponseDto, result);
     } catch (err) {
       if (err instanceof InvalidInputError) {
         throw new BadRequestException(null, err.message);
@@ -76,8 +104,8 @@ export class ForecastController {
     }
   }
 
-  @EventPattern(ForecastService.JOB_NAME)
+  @EventPattern(PGBOSS_JOB_NAME)
   async updateForecastForAllSupportedLocations() {
-    await this.forecastService.updateForecastForAllSupportedLocations();
+    await this.commandBus.execute(new UpdateAllForecastsCommand());
   }
 }
