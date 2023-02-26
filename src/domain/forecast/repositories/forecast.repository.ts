@@ -4,6 +4,7 @@ import { plainToInstance, Type } from 'class-transformer';
 
 import { TemperatureEntity } from '../entities';
 import { DailyTemperatureEntity } from '../entities/daily-temperature.entity';
+import { assert } from 'console';
 
 interface GetAverageTemperatureParams {
   startDate: Date;
@@ -73,9 +74,7 @@ export class ForecastRepository extends Repository<TemperatureEntity> {
       'Average temperature for time period query executed',
     );
 
-    return results.map((item) =>
-      plainToInstance(GetAverageTemperatureQueryResult, item),
-    );
+    return plainToInstance(GetAverageTemperatureQueryResult, results);
   }
 
   async getDailyTemperatures({
@@ -98,6 +97,6 @@ export class ForecastRepository extends Repository<TemperatureEntity> {
       'Daily temperatures for time period query executed',
     );
 
-    return results.map((item) => plainToInstance(DailyTemperatureEntity, item));
+    return plainToInstance(DailyTemperatureEntity, results);
   }
 }
