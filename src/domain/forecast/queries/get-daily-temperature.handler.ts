@@ -1,26 +1,29 @@
 import { Logger } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Query } from '@nestjs-architects/typed-cqrs';
 
 import { LocationEntity } from '../../location/entities'; // TODO: fix cross entity reference
 import { ForecastRepository } from '../repositories/forecast.repository';
 import { InvalidInputError } from '../../../exceptions';
 import { DailyTemperatureResponseDto } from '../dto';
+import { plainToInstance } from 'class-transformer';
 
-export class GetDailyTemperatureQuery {
+export class GetDailyTemperatureQuery extends Query<DailyTemperatureResponseDto> {
   public constructor(
     public readonly startDate: Date,
     public readonly endDate: Date,
     public readonly locationName: string,
     public readonly countryCode: string,
-  ) {}
+  ) {
+    super();
+  }
 }
 
 @QueryHandler(GetDailyTemperatureQuery)
 export class GetDailyTemperatureQueryHandler
-  implements
-    IQueryHandler<GetDailyTemperatureQuery, DailyTemperatureResponseDto>
+  implements IInferredQueryHandler<GetDailyTemperatureQuery>
 {
   private readonly logger = new Logger(GetDailyTemperatureQuery.name);
 
@@ -64,13 +67,13 @@ export class GetDailyTemperatureQueryHandler
       endDate,
     });
 
-    return {
+    return plainToInstance(DailyTemperatureResponseDto, {
       location: location.name,
       countryCode: location.countryCode,
       forecast: results.map(({ day, average_temp: averageTemperature }) => ({
         day,
         averageTemperature,
       })),
-    };
+    });
   }
 }

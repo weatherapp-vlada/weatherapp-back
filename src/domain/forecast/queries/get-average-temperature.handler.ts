@@ -1,26 +1,29 @@
 import { Logger } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
+import { Query } from '@nestjs-architects/typed-cqrs';
 
 import { LocationEntity } from '../../location/entities'; // TODO: fix cross entity reference
 import { ForecastRepository } from '../repositories/forecast.repository';
 import { NotFoundError } from '../../../exceptions';
 import { AverageTemperatureResponseDto } from '../dto';
+import { plainToInstance } from 'class-transformer';
 
-export class GetAverageTemperatureQuery {
+export class GetAverageTemperatureQuery extends Query<AverageTemperatureResponseDto> {
   public constructor(
     public readonly startDate: Date,
     public readonly endDate: Date,
     public readonly cities: string[] = undefined,
     public readonly sort: boolean = false,
-  ) {}
+  ) {
+    super();
+  }
 }
 
 @QueryHandler(GetAverageTemperatureQuery)
 export class GetAverageTemperatureQueryHandler
-  implements
-    IQueryHandler<GetAverageTemperatureQuery, AverageTemperatureResponseDto>
+  implements IInferredQueryHandler<GetAverageTemperatureQuery>
 {
   private readonly logger = new Logger(GetAverageTemperatureQuery.name);
 
@@ -62,13 +65,13 @@ export class GetAverageTemperatureQueryHandler
       sort,
     });
 
-    return {
+    return plainToInstance(AverageTemperatureResponseDto, {
       count: results.length,
       locations: results.map((item) => ({
         averageTemperature: item.average_temp,
         countryCode: item.location_country_code,
         location: item.location_name,
       })),
-    };
+    });
   }
 }

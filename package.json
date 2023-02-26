@@ -27,6 +27,7 @@
     "migration:host:down": "docker-compose -f ./docker/docker-compose.yml exec app npm run migration:down"
   },
   "dependencies": {
+    "@nestjs-architects/typed-cqrs": "^1.1.2-alpha.0",
     "@nestjs/axios": "^2.0.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.1",

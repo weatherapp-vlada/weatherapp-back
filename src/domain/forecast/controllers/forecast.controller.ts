@@ -9,7 +9,6 @@ import {
 import { ApiExtraModels, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { EventPattern } from '@nestjs/microservices';
 import { utc } from 'moment';
-import { plainToInstance } from 'class-transformer';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
 import { InvalidInputError, NotFoundError } from '../../../exceptions';
@@ -25,7 +24,7 @@ import {
 } from '../queries';
 import { UpdateAllForecastsCommand } from '../commands/update-all-forecasts.handler';
 import { PGBOSS_JOB_NAME } from '../utils/constants';
-import { TransformInterceptor } from 'src/interceptors/transform-interceptor';
+import { TransformInterceptor } from '../../../interceptors/transform-interceptor';
 
 @ApiTags('Forecast')
 @Controller('temperature')
@@ -48,10 +47,7 @@ export class ForecastController {
     { startDate, endDate, cities, sort }: GetAverageTemperatureDto,
   ): Promise<AverageTemperatureResponseDto> {
     try {
-      const result = await this.queryBus.execute<
-        GetAverageTemperatureQuery,
-        AverageTemperatureResponseDto
-      >(
+      const result = await this.queryBus.execute(
         new GetAverageTemperatureQuery(
           utc(startDate).startOf('d').toDate(),
           utc(endDate).endOf('d').toDate(),
@@ -60,7 +56,7 @@ export class ForecastController {
         ),
       );
 
-      return plainToInstance(AverageTemperatureResponseDto, result);
+      return result;
     } catch (err) {
       if (err instanceof NotFoundError) {
         throw new NotFoundException(null, err.message);
@@ -82,10 +78,7 @@ export class ForecastController {
     { startDate, endDate, locationName, countryCode }: GetDailyTemperatureDto,
   ): Promise<DailyTemperatureResponseDto> {
     try {
-      const result = await this.queryBus.execute<
-        GetDailyTemperatureQuery,
-        DailyTemperatureResponseDto
-      >(
+      const result = await this.queryBus.execute(
         new GetDailyTemperatureQuery(
           utc(startDate).startOf('d').toDate(),
           utc(endDate).endOf('d').toDate(),
@@ -94,7 +87,7 @@ export class ForecastController {
         ),
       );
 
-      return plainToInstance(DailyTemperatureResponseDto, result);
+      return result;
     } catch (err) {
       if (err instanceof InvalidInputError) {
         throw new BadRequestException(null, err.message);

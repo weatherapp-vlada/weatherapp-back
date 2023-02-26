@@ -25,4 +25,8 @@ export class AverageTemperatureResponseDto {
   })
   @Type(() => SingleDayAverageTemperature)
   locations: SingleDayAverageTemperature[];
+
+  toString() {
+    return 'LOL';
+  }
 }

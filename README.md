@@ -29,7 +29,7 @@
   - [ ] Add pollen and air pollution data points
   - [ ] Add more cities (take into account 1000 req/day and 60 req/sec OpenWeatherMap limits)
 - Metrics and K8s
-  - [ ] Deploy to EKS using GitOps (ArgoCD) and IaC
+  - [o] Deploy to EKS using GitOps (ArgoCD) and IaC
   - [ ] Add metrics using Prometheus
   - [ ] Implement graceful shutdown with shutdown hooks (also check some notes on Prisma interaction with Nest shutdown hooks)
 - User microservice
@@ -40,7 +40,7 @@
   - [ ] Add Redis for caching (and replace PgBoss with `@nestjs/bull`?)
   - [ ] Outbox pattern and resilience
 - Frontend
-  - [ ] Implement Frontend in NextJS (D3.js for some graph visualization)
+  - [o] Implement Frontend in NextJS (D3.js for some graph visualization)
   - [ ] Add GraphQL Backend for frontend? Replace REST API on microservices with GraphQL?
 
 # Starting app locally
