@@ -26,6 +26,7 @@
   - [x] Single responsibility principle when it comes to transforming DTOs
   - [ ] Cover project with tests and add them to CI/CD as quality check
   - [ ] Domain Driven Design
+  - [x] Move infra code to its own git repository
 - Business logic
   - [x] Return all data points to display graph of temperature changes and weather conditions (similar to what google shows when you search "Belgrade weather")
   - [ ] Add pollen and air pollution data points
