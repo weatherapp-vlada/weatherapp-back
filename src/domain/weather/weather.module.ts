@@ -2,9 +2,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CqrsModule } from '@nestjs/cqrs';
 
-import { TemperatureEntity } from './entities';
-import { ForecastController } from './controllers/forecast.controller';
-import { ForecastRepository } from './repositories/forecast.repository';
+import { WeatherEntity } from './entities';
+import { ForecastController } from './controllers/weather.controller';
 import { OpenWeatherApiModule } from '../../open-weather-api/open-weather-api.module';
 import { PgBossModule } from '../../pgboss/pgboss.module';
 import { QueriesHandlers } from './queries';
@@ -18,12 +17,12 @@ import { PGBOSS_JOB_CRON_EXPRESSION, PGBOSS_JOB_NAME } from './utils/constants';
     OpenWeatherApiModule,
     PgBossModule,
     CqrsModule,
-    TypeOrmModule.forFeature([LocationEntity, TemperatureEntity]),
+    TypeOrmModule.forFeature([LocationEntity, WeatherEntity]),
   ],
   controllers: [ForecastController],
-  providers: [ForecastRepository, ...QueriesHandlers, ...CommandsHandlers],
+  providers: [...QueriesHandlers, ...CommandsHandlers],
 })
-export class ForecastModule {
+export class WeatherModule {
   constructor(private readonly pgBossClient: PgBossClient) {}
 
   async onModuleInit() {

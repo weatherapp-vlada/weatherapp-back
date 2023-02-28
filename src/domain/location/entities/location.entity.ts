@@ -17,4 +17,7 @@ export class LocationEntity {
 
   @Column({ type: 'decimal', precision: 19, scale: 16 })
   longitude: number;
+
+  @Column({ type: 'int', name: 'timezone_shift', nullable: true })
+  timezoneShift: number;
 }

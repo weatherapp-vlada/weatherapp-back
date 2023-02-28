@@ -22,14 +22,16 @@
   - [x] Create microservice TransportStrategy and Client for PgBoss
   - [x] Implement CQRS
   - [ ] ~~Switch from TypeORM to Prisma~~ **(too buggy on M1)**
+  - [ ] Switch from TypeORM to MikroORM
   - [x] Single responsibility principle when it comes to transforming DTOs
   - [ ] Cover project with tests and add them to CI/CD as quality check
+  - [ ] Domain Driven Design
 - Business logic
-  - [ ] Return all data points to display graph of temperature changes and weather conditions (similar to what google shows when you search "Belgrade weather")
+  - [x] Return all data points to display graph of temperature changes and weather conditions (similar to what google shows when you search "Belgrade weather")
   - [ ] Add pollen and air pollution data points
   - [ ] Add more cities (take into account 1000 req/day and 60 req/sec OpenWeatherMap limits)
 - Metrics and K8s
-  - [o] Deploy to EKS using GitOps (ArgoCD) and IaC
+  - [ ] Deploy to EKS using GitOps (ArgoCD) and IaC
   - [ ] Add metrics using Prometheus
   - [ ] Implement graceful shutdown with shutdown hooks (also check some notes on Prisma interaction with Nest shutdown hooks)
 - User microservice
@@ -40,8 +42,9 @@
   - [ ] Add Redis for caching (and replace PgBoss with `@nestjs/bull`?)
   - [ ] Outbox pattern and resilience
 - Frontend
-  - [o] Implement Frontend in NextJS (D3.js for some graph visualization)
+  - [ ] Implement Frontend in NextJS (D3.js for some graph visualization)
   - [ ] Add GraphQL Backend for frontend? Replace REST API on microservices with GraphQL?
+  - [ ] Admin UI?
 
 # Starting app locally
 

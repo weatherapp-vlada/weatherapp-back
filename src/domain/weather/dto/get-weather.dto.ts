@@ -1,10 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsOptional, Validate } from 'class-validator';
+import { IsOptional, Validate } from 'class-validator';
 
 import { IsLessOrEqualConstraint } from '../../../validators';
 
-export class GetAverageTemperatureDto {
+export class GetWeatherDto {
   @ApiProperty({
     type: Date,
   }) // TODO: validations
@@ -24,10 +24,4 @@ export class GetAverageTemperatureDto {
   @IsOptional()
   @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   cities?: string[];
-
-  @ApiPropertyOptional({ type: Boolean })
-  @IsBoolean()
-  @Transform(({ value }) => value === 'true')
-  @IsOptional()
-  sort = false;
 }

@@ -6,39 +6,39 @@ import { utc } from 'moment';
 
 import { LocationEntity } from '../../location/entities'; // TODO: fix cross entity reference
 import { OpenWeatherApiService } from '../../../open-weather-api/open-weather-api.service';
-import { TemperatureEntity } from '../entities';
+import { WeatherEntity } from '../entities';
 
-export class UpdateAllForecastsCommand {}
+export class UpdateWeatherCommand {}
 
-@CommandHandler(UpdateAllForecastsCommand)
-export class UpdateAllForecastsCommandHandler
-  implements ICommandHandler<UpdateAllForecastsCommand>
+@CommandHandler(UpdateWeatherCommand)
+export class UpdateWeatherCommandHandler
+  implements ICommandHandler<UpdateWeatherCommand>
 {
-  private readonly logger = new Logger(UpdateAllForecastsCommandHandler.name);
+  private readonly logger = new Logger(UpdateWeatherCommandHandler.name);
 
   public constructor(
     private readonly openWeatherApiService: OpenWeatherApiService,
     @InjectRepository(LocationEntity)
     private readonly locationsRepository: Repository<LocationEntity>,
-    @InjectRepository(TemperatureEntity)
-    private readonly temperaturesRepository: Repository<TemperatureEntity>,
+    @InjectRepository(WeatherEntity)
+    private readonly weatherRepository: Repository<WeatherEntity>,
   ) {}
 
   public async execute(): Promise<void> {
     const locations = await this.locationsRepository.find();
-    const promises = locations.map(this.updateForecastForLocation.bind(this));
+    const promises = locations.map(this.updateWeatherForLocation.bind(this));
 
     await Promise.all(promises);
   }
 
-  async updateForecastForLocation({
+  private async updateWeatherForLocation({
     latitude: lat,
     longitude: lon,
     id,
     name,
   }: LocationEntity) {
     try {
-      const shouldUpdateForecast = await this.shouldUpdateForecast(id);
+      const shouldUpdateForecast = await this.shouldUpdateWeather(id);
       if (!shouldUpdateForecast) {
         this.logger.log(
           { input: { lat, lon, id, name } },
@@ -49,18 +49,41 @@ export class UpdateAllForecastsCommandHandler
       }
 
       this.logger.log({ input: { name } }, 'Updating forecast...');
-      const forecasts = await this.openWeatherApiService.fetchForecast({
+      const weather = await this.openWeatherApiService.fetchForecast({
         lat,
         lon,
       });
 
-      const entities = forecasts.map(({ timestamp, temperatureCelsius }) => ({
-        locationId: id,
-        timestamp: new Date(timestamp * 1000),
-        temperatureCelsius,
-      }));
+      const weatherEntities = weather.map<Partial<WeatherEntity>>(
+        ({
+          timestamp,
+          temperatureCelsius,
+          humidity,
+          precipitationProbability,
+          pressure,
+          rainVolumePast3Hours: rainVolumePast3HoursMm,
+          snowVolumePast3Hours: snowVolumePast3HoursMm,
+          weatherConditionId,
+          windDirection,
+          windSpeedMetersPerSecond,
+          isNight,
+        }) => ({
+          locationId: id,
+          timestamp,
+          temperatureCelsius,
+          humidity,
+          precipitationProbability,
+          pressure,
+          rainVolumePast3HoursMm,
+          snowVolumePast3HoursMm,
+          weatherConditionId,
+          windDirection,
+          windSpeedMetersPerSecond,
+          isNight,
+        }),
+      );
 
-      await this.temperaturesRepository.save(entities);
+      await this.weatherRepository.save(weatherEntities);
       this.logger.log({ input: { name } }, 'Forecast updated');
     } catch (err) {
       this.logger.error(
@@ -77,14 +100,14 @@ export class UpdateAllForecastsCommandHandler
     }
   }
 
-  async shouldUpdateForecast(locationId: number) {
+  private async shouldUpdateWeather(locationId: number) {
     const now = utc();
     const endOfMaxForecastDate = now.add(
       OpenWeatherApiService.OPENWEATHERMAPAPI_FORECAST_DAYS,
       'days',
     );
 
-    const count = await this.temperaturesRepository.count({
+    const count = await this.weatherRepository.count({
       where: {
         locationId,
         timestamp: Between(now.toDate(), endOfMaxForecastDate.toDate()),
