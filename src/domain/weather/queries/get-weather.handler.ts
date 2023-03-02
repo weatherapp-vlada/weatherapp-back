@@ -14,7 +14,7 @@ export class GetWeatherQuery extends Query<GetWeatherResponseDto> {
   public constructor(
     public readonly startDate: Date,
     public readonly endDate: Date,
-    public readonly cities: string[],
+    public readonly locationIds: number[],
   ) {
     super();
   }
@@ -36,19 +36,19 @@ export class GetWeatherQueryHandler
   async execute({
     startDate,
     endDate,
-    cities,
+    locationIds,
   }: GetWeatherQuery): Promise<GetWeatherResponseDto> {
     this.logger.log(
-      { input: { startDate, endDate, cities } },
+      { input: { startDate, endDate, locationIds } },
       'Retrieving weather for time period',
     );
 
     const locations = await this.locationsRepository.find({
-      where: { ...(!cities?.length ? {} : { name: In([...cities]) }) },
+      where: { ...(!locationIds?.length ? {} : { id: In([...locationIds]) }) },
     });
 
     this.logger.log(
-      { input: { cities }, result: locations },
+      { input: { locationIds }, result: locations },
       'Get locations filtered by name query executed',
     );
 

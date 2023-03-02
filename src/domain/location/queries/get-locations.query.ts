@@ -1,15 +1,17 @@
 import { Logger } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { Query } from '@nestjs-architects/typed-cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { LocationEntity } from '../entities/location.entity';
+import { GetLocationsResponseDto } from '../dto';
 
-export class GetLocationsQuery {}
+export class GetLocationsQuery extends Query<GetLocationsResponseDto> {}
 
 @QueryHandler(GetLocationsQuery)
 export class GetLocationsQueryHandler
-  implements IQueryHandler<GetLocationsQuery>
+  implements IInferredQueryHandler<GetLocationsQuery>
 {
   private readonly logger = new Logger(GetLocationsQueryHandler.name);
 
@@ -23,9 +25,13 @@ export class GetLocationsQueryHandler
 
     this.logger.log({ result: locations }, 'Get all locations query executed');
 
-    return locations.map(({ name, countryCode }) => ({
-      name,
-      countryCode,
-    }));
+    return {
+      count: locations.length,
+      locations: locations.map(({ id, name, countryCode }) => ({
+        id,
+        name,
+        countryCode,
+      })),
+    };
   }
 }

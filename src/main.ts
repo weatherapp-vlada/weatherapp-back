@@ -31,6 +31,7 @@ async function bootstrap() {
     strategy: new PgBossTransportStrategy(configService),
   });
 
+  app.enableCors(); // TODO: tighten this a bit
   await app.startAllMicroservices();
   await app.listen(3000);
 }

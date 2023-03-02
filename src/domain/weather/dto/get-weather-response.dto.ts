@@ -59,6 +59,5 @@ export class GetWeatherResponseDto {
     type: LocationWeatherDto,
     isArray: true,
   })
-  @Type(() => LocationWeatherDto)
   locations: LocationWeatherDto[];
 }

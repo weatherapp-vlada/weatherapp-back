@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsOptional, Validate } from 'class-validator';
+import { Validate } from 'class-validator';
 
 import { IsLessOrEqualConstraint } from '../../../validators';
 
@@ -20,8 +20,10 @@ export class GetWeatherDto {
   // @Validate(MatchesDatePatternConstraint)
   endDate: Date;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
-  cities?: string[];
+  @ApiPropertyOptional({
+    type: Number,
+    isArray: true,
+  })
+  @Transform(({ value }) => value.split(','))
+  locationIds?: number[];
 }

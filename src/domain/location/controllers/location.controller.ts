@@ -1,22 +1,22 @@
 import { Controller, Get } from '@nestjs/common';
+import { QueryBus } from '@nestjs/cqrs';
 import { ApiExtraModels, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { LocationDto } from '../dto';
-import { LocationService } from '../services/location.service';
+import { LocationDto, GetLocationsResponseDto } from '../dto';
+import { GetLocationsQuery } from '../queries/get-locations.query';
 
 @ApiTags('Location')
-@Controller('location')
+@Controller('locations')
 export class LocationController {
-  constructor(private readonly locationService: LocationService) {}
+  constructor(private readonly queryBus: QueryBus) {}
 
   @Get()
   @ApiExtraModels(LocationDto)
   @ApiResponse({
     status: 200,
-    isArray: true,
-    type: LocationDto,
+    type: GetLocationsResponseDto,
   })
-  getLocations(): Promise<LocationDto[]> {
-    return this.locationService.getLocations();
+  getLocations(): Promise<GetLocationsResponseDto> {
+    return this.queryBus.execute(new GetLocationsQuery());
   }
 }

@@ -1,1 +1,1 @@
-export * from './location.dto';
+export * from './get-locations-response.dto';

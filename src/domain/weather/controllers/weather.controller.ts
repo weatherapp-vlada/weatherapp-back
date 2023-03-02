@@ -1,5 +1,10 @@
 import { Controller, Get, NotFoundException, Query } from '@nestjs/common';
-import { ApiExtraModels, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiExtraModels,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { EventPattern } from '@nestjs/microservices';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
@@ -21,16 +26,20 @@ export class ForecastController {
   @ApiExtraModels(GetWeatherResponseDto)
   @ApiResponse({
     status: 200,
-    isArray: true,
     type: GetWeatherResponseDto,
+  })
+  @ApiQuery({
+    name: 'locationIds',
+    explode: false,
+    required: false,
   })
   async getWeather(
     @Query()
-    { startDate, endDate, cities }: GetWeatherDto,
+    { startDate, endDate, locationIds }: GetWeatherDto,
   ): Promise<GetWeatherResponseDto> {
     try {
       const result = await this.queryBus.execute(
-        new GetWeatherQuery(startDate, endDate, cities),
+        new GetWeatherQuery(startDate, endDate, locationIds),
       );
 
       return result;
