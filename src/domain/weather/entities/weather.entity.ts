@@ -1,84 +1,50 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
-
-import { LocationEntity } from '../../location/entities'; // TODO: fix cross entity reference
+import {
+  Entity,
+  ManyToOne,
+  OptionalProps,
+  PrimaryKey,
+  Property,
+} from '@mikro-orm/core';
+import { LocationEntity } from '../../location/entities';
 import { WeatherConditionEntity } from './weather-condition.entity';
 
-@Entity({ name: 'weather' })
+@Entity({ tableName: 'weather' })
 export class WeatherEntity {
-  @PrimaryColumn()
-  timestamp: Date;
+  [OptionalProps]?: 'rainVolume' | 'snowVolume';
 
-  @PrimaryColumn({ name: 'location_id' })
-  locationId: number;
+  @PrimaryKey({ length: 6 })
+  timestamp!: Date;
 
-  @ManyToOne(() => LocationEntity)
-  @JoinColumn({ name: 'location_id', referencedColumnName: 'id' })
-  location: LocationEntity;
+  @ManyToOne({ entity: () => LocationEntity, primary: true })
+  location!: LocationEntity;
 
-  @Column({
-    type: 'float',
-    name: 'temperature_celsius',
-  })
-  temperatureCelsius: number;
+  @Property({ columnType: 'float8' })
+  temperatureCelsius!: number;
 
-  @Column({
-    type: 'int',
-    nullable: true,
-  })
-  pressure: number;
+  @Property()
+  pressure!: number;
 
-  @Column({
-    type: 'int',
-    nullable: true,
-  })
-  humidity: number;
+  @Property()
+  humidity!: number;
 
-  @Column({
-    type: 'float',
-    name: 'wind_speed',
-    nullable: true,
-  })
-  windSpeedMetersPerSecond: number;
+  @Property({ columnType: 'float8' })
+  windSpeed!: number;
 
-  @Column({
-    type: 'int',
-    name: 'wind_direction',
-    nullable: true,
-  })
-  windDirection: number;
+  @Property()
+  windDirection!: number;
 
-  @Column({
-    type: 'float',
-    name: 'rain_volume',
-    default: 0,
-  })
-  rainVolumePast3HoursMm: number;
+  @Property({ columnType: 'float8', default: 0 })
+  rainVolume!: number;
 
-  @Column({
-    type: 'float',
-    name: 'snow_volume',
-    default: 0,
-  })
-  snowVolumePast3HoursMm: number;
+  @Property({ columnType: 'float8', default: 0 })
+  snowVolume!: number;
 
-  @Column({
-    type: 'float',
-    name: 'precipitation_probability',
-    nullable: true,
-  })
-  precipitationProbability: number;
+  @Property({ columnType: 'float8' })
+  precipitationProbability!: number;
 
-  @Column({ name: 'weather_condition_id' })
-  weatherConditionId: number;
+  @ManyToOne({ entity: () => WeatherConditionEntity })
+  weatherCondition!: WeatherConditionEntity;
 
-  @ManyToOne(() => WeatherConditionEntity, {
-    nullable: true,
-  })
-  @JoinColumn({ name: 'weather_condition_id', referencedColumnName: 'id' })
-  weatherCondition: WeatherConditionEntity;
-
-  @Column({
-    name: 'is_night',
-  })
-  isNight: boolean;
+  @Property()
+  isNight!: boolean;
 }

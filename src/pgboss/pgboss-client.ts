@@ -1,9 +1,8 @@
+import { MikroOrmModuleOptions } from '@mikro-orm/nestjs';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxy, ReadPacket, WritePacket } from '@nestjs/microservices';
 import * as PgBoss from 'pg-boss';
-
-import { TypeormConfiguration } from '../config/db.config';
 
 export type Options = PgBoss.JobOptions;
 
@@ -30,15 +29,15 @@ export class PgBossClient extends ClientProxy {
 
     const {
       host,
-      username: user,
+      user,
       password,
-      database,
+      dbName: database,
       port,
-    } = this.configService.get<TypeormConfiguration>('database');
+    } = this.configService.get<MikroOrmModuleOptions>('database');
     this.boss = new PgBoss({
       host,
       user,
-      password,
+      password: password.toString(),
       database,
       port,
     });

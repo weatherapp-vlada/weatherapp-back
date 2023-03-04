@@ -1,23 +1,23 @@
-import { Entity, Column, Unique, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, PrimaryKey, Property, Unique } from '@mikro-orm/core';
 
-@Entity({ name: 'location' })
-@Unique('idx_uniq_city', ['name', 'countryCode'])
+@Entity({ tableName: 'location' })
+@Unique({ name: 'idx_uniq_city', properties: ['name', 'countryCode'] })
 export class LocationEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryKey()
+  id!: number;
 
-  @Column()
-  name: string;
+  @Property()
+  name!: string;
 
-  @Column({ name: 'country_code', length: 2 })
-  countryCode: string;
+  @Property({ length: 2 })
+  countryCode!: string;
 
-  @Column({ type: 'decimal', precision: 19, scale: 16 })
-  latitude: number;
+  @Property({ columnType: 'numeric', precision: 19, scale: 16 })
+  latitude!: string;
 
-  @Column({ type: 'decimal', precision: 19, scale: 16 })
-  longitude: number;
+  @Property({ columnType: 'numeric', precision: 19, scale: 16 })
+  longitude!: string;
 
-  @Column({ type: 'int', name: 'timezone_shift', nullable: true })
-  timezoneShift: number;
+  @Property()
+  timezoneShift!: number;
 }

@@ -22,7 +22,7 @@
   - [x] Create microservice TransportStrategy and Client for PgBoss
   - [x] Implement CQRS
   - [ ] ~~Switch from TypeORM to Prisma~~ **(too buggy on M1)**
-  - [ ] Switch from TypeORM to MikroORM
+  - [x] Switch from TypeORM to MikroORM
   - [x] Single responsibility principle when it comes to transforming DTOs
   - [ ] Cover project with tests and add them to CI/CD as quality check
   - [ ] Domain Driven Design

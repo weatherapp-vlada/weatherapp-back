@@ -1,37 +1,18 @@
+import { MikroOrmModuleOptions } from '@mikro-orm/nestjs';
 import { registerAs } from '@nestjs/config';
 
-export interface TypeormConfiguration {
-  type: 'postgres';
-  logging: boolean;
-  host: string;
-  port: number;
-  username: string;
-  password: string;
-  database: string;
-  autoLoadEntities: boolean;
-  migrationsRun: boolean;
-  entities: string[];
-  migrations: string[];
-  cli: {
-    migrationsDir: string;
-  };
-}
-
-export const dataSourceOptions = {
-  type: 'postgres',
-  logging: false,
+export const mikroOrmOptions: MikroOrmModuleOptions = {
+  // entities: ['dist/**/*.entity.js'],
+  // entitiesTs: ['src/**/*.entity.ts'],
+  debug: false,
+  dbName: process.env.DB_NAME,
+  type: 'postgresql',
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT),
-  username: process.env.DB_USERNAME,
+  user: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
   autoLoadEntities: true,
-  migrationsRun: true,
-  entities: ['dist/**/*.entity{.ts,.js}'],
-  migrations: ['dist/src/migrations/*{.ts,.js}'],
-  cli: {
-    migrationsDir: 'src/migrations',
-  },
+  forceUtcTimezone: true,
 };
 
-export default registerAs('database', () => dataSourceOptions);
+export default registerAs('database', () => mikroOrmOptions);

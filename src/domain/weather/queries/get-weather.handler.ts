@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, In, Repository } from 'typeorm';
+import { EntityRepository, QueryOrder } from '@mikro-orm/core';
 import { Query } from '@nestjs-architects/typed-cqrs';
 import { groupBy, keyBy } from 'lodash';
 
@@ -28,9 +28,9 @@ export class GetWeatherQueryHandler
 
   constructor(
     @InjectRepository(LocationEntity)
-    private readonly locationsRepository: Repository<LocationEntity>,
+    private readonly locationsRepository: EntityRepository<LocationEntity>,
     @InjectRepository(WeatherEntity)
-    private readonly weatherRepository: Repository<WeatherEntity>,
+    private readonly weatherRepository: EntityRepository<WeatherEntity>,
   ) {}
 
   async execute({
@@ -44,7 +44,7 @@ export class GetWeatherQueryHandler
     );
 
     const locations = await this.locationsRepository.find({
-      where: { ...(!locationIds?.length ? {} : { id: In([...locationIds]) }) },
+      ...(!locationIds?.length ? {} : { id: locationIds }),
     });
 
     this.logger.log(
@@ -56,21 +56,26 @@ export class GetWeatherQueryHandler
       throw new NotFoundError('No supported cities provided.');
     }
 
-    const results = await this.weatherRepository.find({
-      where: {
-        timestamp: Between(startDate, endDate),
-        locationId: In(locations.map(({ id }) => id)),
+    const results = await this.weatherRepository.find(
+      {
+        location: {
+          id: locations.map(({ id }) => id),
+        },
+        timestamp: {
+          $gte: startDate,
+          $lte: endDate,
+        },
       },
-      order: {
-        timestamp: 'ASC',
+      {
+        orderBy: {
+          timestamp: QueryOrder.ASC,
+        },
+        populate: ['weatherCondition'],
       },
-      relations: {
-        weatherCondition: true,
-      },
-    });
+    );
 
     const resultsGroupedByLocationEntries = Object.entries(
-      groupBy(results, ({ locationId }) => locationId),
+      groupBy(results, ({ location: { id } }) => id),
     );
 
     const locationLookup = keyBy(locations, ({ id }) => id);
@@ -89,10 +94,10 @@ export class GetWeatherQueryHandler
                 temperatureCelsius,
                 pressure,
                 humidity,
-                windSpeedMetersPerSecond,
+                windSpeed: windSpeedMetersPerSecond,
                 windDirection,
-                rainVolumePast3HoursMm,
-                snowVolumePast3HoursMm,
+                rainVolume: rainVolumePast3HoursMm,
+                snowVolume: snowVolumePast3HoursMm,
                 precipitationProbability,
                 weatherCondition: { description: weatherDescription },
                 isNight,

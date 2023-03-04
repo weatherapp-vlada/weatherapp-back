@@ -3,8 +3,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 
 interface FetchForecastParams {
-  lat: number;
-  lon: number;
+  lat: string;
+  lon: string;
 }
 
 interface WeatherResponse {

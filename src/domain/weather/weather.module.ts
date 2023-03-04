@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { CqrsModule } from '@nestjs/cqrs';
 
 import { WeatherEntity } from './entities';
@@ -17,7 +17,7 @@ import { PGBOSS_JOB_CRON_EXPRESSION, PGBOSS_JOB_NAME } from './utils/constants';
     OpenWeatherApiModule,
     PgBossModule,
     CqrsModule,
-    TypeOrmModule.forFeature([LocationEntity, WeatherEntity]),
+    MikroOrmModule.forFeature([LocationEntity, WeatherEntity]),
   ],
   controllers: [ForecastController],
   providers: [...QueriesHandlers, ...CommandsHandlers],

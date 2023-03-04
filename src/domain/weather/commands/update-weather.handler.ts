@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { EntityRepository } from '@mikro-orm/core';
 import { Logger } from '@nestjs/common';
 import { utc } from 'moment';
 
@@ -19,13 +19,13 @@ export class UpdateWeatherCommandHandler
   public constructor(
     private readonly openWeatherApiService: OpenWeatherApiService,
     @InjectRepository(LocationEntity)
-    private readonly locationsRepository: Repository<LocationEntity>,
+    private readonly locationsRepository: EntityRepository<LocationEntity>,
     @InjectRepository(WeatherEntity)
-    private readonly weatherRepository: Repository<WeatherEntity>,
+    private readonly weatherRepository: EntityRepository<WeatherEntity>,
   ) {}
 
   public async execute(): Promise<void> {
-    const locations = await this.locationsRepository.find();
+    const locations = await this.locationsRepository.findAll();
     const promises = locations.map(this.updateWeatherForLocation.bind(this));
 
     await Promise.all(promises);
@@ -54,36 +54,36 @@ export class UpdateWeatherCommandHandler
         lon,
       });
 
-      const weatherEntities = weather.map<Partial<WeatherEntity>>(
+      const weatherEntities = weather.map(
         ({
           timestamp,
           temperatureCelsius,
           humidity,
           precipitationProbability,
           pressure,
-          rainVolumePast3Hours: rainVolumePast3HoursMm,
-          snowVolumePast3Hours: snowVolumePast3HoursMm,
+          rainVolumePast3Hours: rainVolume,
+          snowVolumePast3Hours: snowVolume,
           weatherConditionId,
           windDirection,
-          windSpeedMetersPerSecond,
+          windSpeedMetersPerSecond: windSpeed,
           isNight,
         }) => ({
-          locationId: id,
+          location: id,
+          weatherCondition: weatherConditionId,
           timestamp,
           temperatureCelsius,
           humidity,
           precipitationProbability,
           pressure,
-          rainVolumePast3HoursMm,
-          snowVolumePast3HoursMm,
-          weatherConditionId,
+          rainVolume,
+          snowVolume,
           windDirection,
-          windSpeedMetersPerSecond,
+          windSpeed,
           isNight,
         }),
       );
 
-      await this.weatherRepository.save(weatherEntities);
+      await this.weatherRepository.upsertMany(weatherEntities);
       this.logger.log({ input: { name } }, 'Forecast updated');
     } catch (err) {
       this.logger.error(
@@ -102,15 +102,17 @@ export class UpdateWeatherCommandHandler
 
   private async shouldUpdateWeather(locationId: number) {
     const now = utc();
-    const endOfMaxForecastDate = now.add(
-      OpenWeatherApiService.OPENWEATHERMAPAPI_FORECAST_DAYS,
-      'days',
-    );
+    const endOfMaxForecastDate = now
+      .clone()
+      .add(OpenWeatherApiService.OPENWEATHERMAPAPI_FORECAST_DAYS, 'days');
 
     const count = await this.weatherRepository.count({
-      where: {
-        locationId,
-        timestamp: Between(now.toDate(), endOfMaxForecastDate.toDate()),
+      location: {
+        id: locationId,
+      },
+      timestamp: {
+        $gte: now.toDate(),
+        $lte: endOfMaxForecastDate.toDate(),
       },
     });
 

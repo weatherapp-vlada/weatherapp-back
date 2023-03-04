@@ -1,15 +1,13 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 
-@Entity({ name: 'weather_condition' })
+@Entity({ tableName: 'weather_condition' })
 export class WeatherConditionEntity {
-  @PrimaryColumn({
-    type: 'int',
-  })
-  id: number;
+  @PrimaryKey()
+  id!: number;
 
-  @Column()
-  description: string;
+  @Property()
+  description!: string;
 
-  @Column()
-  icon: string;
+  @Property()
+  icon!: string;
 }

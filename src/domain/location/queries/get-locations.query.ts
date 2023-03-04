@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { IInferredQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Query } from '@nestjs-architects/typed-cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityRepository } from '@mikro-orm/core';
 
 import { LocationEntity } from '../entities/location.entity';
 import { GetLocationsResponseDto } from '../dto';
@@ -17,11 +17,11 @@ export class GetLocationsQueryHandler
 
   constructor(
     @InjectRepository(LocationEntity)
-    private readonly locationsRepository: Repository<LocationEntity>,
+    private readonly locationsRepository: EntityRepository<LocationEntity>,
   ) {}
 
   async execute() {
-    const locations = await this.locationsRepository.find();
+    const locations = await this.locationsRepository.findAll();
 
     this.logger.log({ result: locations }, 'Get all locations query executed');
 

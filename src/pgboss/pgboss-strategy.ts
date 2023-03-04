@@ -1,3 +1,4 @@
+import { MikroOrmModuleOptions } from '@mikro-orm/nestjs';
 import { ConfigService } from '@nestjs/config';
 import {
   CustomTransportStrategy,
@@ -5,7 +6,6 @@ import {
   Server,
 } from '@nestjs/microservices';
 import * as PgBoss from 'pg-boss';
-import { TypeormConfiguration } from '../config/db.config';
 
 export class PgBossTransportStrategy
   extends Server
@@ -24,15 +24,15 @@ export class PgBossTransportStrategy
 
     const {
       host,
-      username: user,
+      user,
       password,
-      database,
+      dbName: database,
       port,
-    } = this.configService.get<TypeormConfiguration>('database');
+    } = this.configService.get<MikroOrmModuleOptions>('database');
     this.boss = new PgBoss({
       host,
       user,
-      password,
+      password: password.toString(),
       database,
       port,
     });

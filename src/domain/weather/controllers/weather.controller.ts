@@ -7,6 +7,7 @@ import {
 } from '@nestjs/swagger';
 import { EventPattern } from '@nestjs/microservices';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { MikroORM, UseRequestContext } from '@mikro-orm/core';
 
 import { NotFoundError } from '../../../exceptions';
 import { GetWeatherResponseDto, GetWeatherDto } from '../dto';
@@ -20,6 +21,7 @@ export class ForecastController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly orm: MikroORM,
   ) {}
 
   @Get('/')
@@ -53,6 +55,7 @@ export class ForecastController {
   }
 
   @EventPattern(PGBOSS_JOB_NAME)
+  @UseRequestContext() // required because this is not HTTP context and is not handled by middleware
   async updateWeatherForAllSupportedLocations() {
     await this.commandBus.execute(new UpdateWeatherCommand());
   }
