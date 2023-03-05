@@ -10,6 +10,10 @@ const config: Options = {
   user: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   forceUtcTimezone: true,
+  migrations: {
+    pathTs: './src/migrations',
+    path: './dist/src/migrations',
+  },
 };
 
 export default config;

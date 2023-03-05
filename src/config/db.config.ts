@@ -13,6 +13,10 @@ export const mikroOrmOptions: MikroOrmModuleOptions = {
   password: process.env.DB_PASSWORD,
   autoLoadEntities: true,
   forceUtcTimezone: true,
+  migrations: {
+    pathTs: process.cwd() + '/migrations',
+    path: process.cwd() + '/dist/src/migrations',
+  },
 };
 
 export default registerAs('database', () => mikroOrmOptions);

@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import {
   HealthCheckService,
   HealthCheck,
-  TypeOrmHealthIndicator,
+  MikroOrmHealthIndicator,
 } from '@nestjs/terminus';
 
 @ApiTags('Monitoring')
@@ -11,7 +11,7 @@ import {
 export class HealthController {
   constructor(
     private health: HealthCheckService,
-    private db: TypeOrmHealthIndicator,
+    private db: MikroOrmHealthIndicator,
   ) {}
 
   @Get()
