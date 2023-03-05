@@ -17,7 +17,7 @@ import { PGBOSS_JOB_NAME } from '../utils/constants';
 
 @ApiTags('Weather')
 @Controller('weather')
-export class ForecastController {
+export class WeatherController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,

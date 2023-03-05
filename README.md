@@ -38,12 +38,13 @@
 - User microservice
   - [ ] Add auth (AWS Cognito)
   - [ ] Add feature for users to create their own dashboards with forecasts and notification triggers (AWS SES, take into account 11 (?) mails/sec)
+- Messaging and caching
   - [ ] Add Kafka for messaging (deploy inside K8s using Strimzi)
   - [ ] Implement Saga distributed transaction (use-case TBD, maybe will require 3rd microservice)
   - [ ] Add Redis for caching (and replace PgBoss with `@nestjs/bull`?)
   - [ ] Outbox pattern and resilience
 - Frontend
-  - [ ] Implement Frontend in NextJS (D3.js for some graph visualization)
+  - [x] Implement Frontend in NextJS (D3.js for some graph visualization)
   - [ ] Add GraphQL Backend for frontend? Replace REST API on microservices with GraphQL?
   - [ ] Admin UI?
 

@@ -3,7 +3,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { CqrsModule } from '@nestjs/cqrs';
 
 import { WeatherEntity } from './entities';
-import { ForecastController } from './controllers/weather.controller';
+import { WeatherController } from './controllers/weather.controller';
 import { OpenWeatherApiModule } from '../../open-weather-api/open-weather-api.module';
 import { PgBossModule } from '../../pgboss/pgboss.module';
 import { QueriesHandlers } from './queries';
@@ -19,7 +19,7 @@ import { PGBOSS_JOB_CRON_EXPRESSION, PGBOSS_JOB_NAME } from './utils/constants';
     CqrsModule,
     MikroOrmModule.forFeature([LocationEntity, WeatherEntity]),
   ],
-  controllers: [ForecastController],
+  controllers: [WeatherController],
   providers: [...QueriesHandlers, ...CommandsHandlers],
 })
 export class WeatherModule {
